@@ -1,0 +1,164 @@
+global_attrs:
+    title: "${EUREC4A} level 1 sounding data"
+    description: ???
+    campaign_id: ${campaign_id}
+    platform: ${platform}
+    instrument: "Radiosonde RS41-SGP by Vaisala"
+    instrument_id: "Vaisala-RS"
+    number_of_probe: ${number_of_prope}
+    sonde_type: ${sonde_type}
+    sonde_frequency: ${sonde_frequency}
+    source: ${source_level_1}
+    doi: "10.205326/137"
+    version: ${dataset_version}
+    featureType: "trajectory"
+    Conventions: "CF-1.7"
+
+coordinates:
+    sounding:
+        attrs:
+            cf_role : "trajecotry_id"
+            long_name: "sounding identifier"
+            description: "unique string describing the soundings origin (PLATFORM_SND-DIRECTION_LAT_LON_TIME)"
+        dimension: ${sounding_dim}
+    level:
+        attrs: ???
+        dimension: ${level_dim}
+variables:
+    launch_time:
+        attrs:
+            standard_name: "time"
+            long_name: "time at which the sounding started"
+        encodings:
+            units: "seconds since 2020-01-01"
+            calendar: "proleptic_gregorian"
+        coordinates:
+            - sounding
+    flight_time:
+        attrs:
+            long_name: "time at pressure level"
+            axis: "T"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "seconds since 2020-01-01"
+            calendar: "proleptic_gregorian"
+        coordinates:
+            - sounding
+            - level
+    dz:
+        attrs:
+            long_name: "ascent/descent rate of measuring device"
+            description: "ascent rate is positive/ decent rate is negative"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "m/s"
+        coordinates:
+            - sounding
+            - level
+    p:
+        attrs:
+            standard_name: "air_pressure"
+            long_name: "pressure"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "Pa"
+        coordinates:
+            - sounding
+            - level
+    alt:
+        attrs:
+            standard_name: "geopotential_height"
+            long_name: "geopotential height retrieved from PTU"
+            positive: "up"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "m"
+        coordinates:
+            - sounding
+            - level
+    ta:
+        attrs:
+            standard_name: "air_temperature"
+            long_name: "dry bulb temperature"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "K"
+        coordinates:
+            - sounding
+            - level
+    rh:
+        attrs:
+            standard_name: "relative_humidity"
+            long_name: "relative humidity"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "1"
+        coordinates:
+            - sounding
+            - level
+    dp:
+        attrs:
+            standard_name: "dew_point_temperature"
+            long_name: "dew point temperature"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "K"
+        coordinates:
+            - sounding
+            - level
+    mr:
+        attrs:
+            standard_name: "humidity_mixing_ratio"
+            long_name: "water vapor mixing ratio"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "kg/kg"
+        coordinates:
+            - sounding
+            - level
+    wspd:
+        attrs:
+            standard_name: "wind_speed"
+            long_name: "wind speed"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "m/s"
+        coordinates:
+            - sounding
+            - level
+    wdir:
+        attrs:
+            standard_name: "wind_from_direction"
+            long_name: "wind direction"
+            coordinates: "launch_time flight_time lon lat p"
+        encodings:
+            units: "degree"
+        coordinates:
+            - sounding
+            - level
+    lat:
+        attrs:
+            standard_name: "latitude"
+            long_name: "latitude"
+            axis: "Y"
+        encodings:
+            units: "degrees_north"
+        coordinates:
+            - sounding
+            - level
+    lon:
+        attrs:
+            standard_name: "latitude"
+            long_name: "latitude"
+            axis: "Y"
+        encodings:
+            units: "degrees_north"
+        coordinates:
+            - sounding
+            - level
+    sounding_id:
+        attrs:
+            long_name: "sounding identifier"
+        format: ${platform}"__{direction}__{lat:3.2f}_{lon:4.2f}__{time}"
+        coordinates:
+            - sounding
