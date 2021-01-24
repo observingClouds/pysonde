@@ -6,7 +6,6 @@ import sys
 
 import numpy as np
 import xarray as xr
-from netCDF4 import num2date
 
 sys.path.append(os.path.dirname(__file__))
 import thermodynamics as td  # noqa: E402
@@ -46,11 +45,11 @@ class Sounding:
                     continue
                 window_size = 5
                 smoothed_heights = np.convolve(
-                    sounding.Height, np.ones((window_size,)) / window_size, mode="valid"
+                    sounding.height, np.ones((window_size,)) / window_size, mode="valid"
                 )
                 if not np.all(func(np.gradient(smoothed_heights), 0)):
-                    total = len(sounding.Height)
-                    nb_diff = total - np.sum(func(np.gradient(sounding.Height), 0))
+                    total = len(sounding.height)
+                    nb_diff = total - np.sum(func(np.gradient(sounding.height), 0))
                     logging.warning(
                         "Of {} observations, {} observations have an inconsistent "
                         "sounding direction".format(total, nb_diff)
@@ -60,7 +59,7 @@ class Sounding:
                     logging.warning(
                         "Calculate bursting of balloon from maximum geopotential height"
                     )
-                    idx_max_hgt = np.argmax(self.profile.Height)
+                    idx_max_hgt = np.argmax(self.profile.height)
 
                     sounding_ascent.profile = self.profile.iloc[0 : idx_max_hgt + 1]
                     sounding_descent.profile = self.profile.iloc[idx_max_hgt + 1 :]
@@ -78,11 +77,15 @@ class Sounding:
 
         negative if sonde is falling
         """
-        ascent_rate = np.diff(self.profile.Height) / (
-            np.diff(self.profile.flight_time.astype(np.float) / 1e9)
-        )
-        ascent_rate = np.concatenate(([0], ascent_rate))  # 0 at first measurement
-        self.profile["ascent_rate"] = ascent_rate
+        time_delta = np.diff(self.profile.flight_time) / np.timedelta64(1, "s")
+        height_delta = np.diff(self.profile.height)
+        ascent_rate = height_delta / time_delta
+        # ascent_rate = np.diff(self.profile.height) / (
+        #    np.diff(self.profile.flight_time.astype(np.float) / 1e9)
+        # )
+        ascent_rate_ = np.concatenate(([0], ascent_rate))  # 0 at first measurement
+        # self.profile["ascent_rate"] = ascent_rate_
+        self.profile.insert(10, "ascent_rate", ascent_rate_)
 
     def calc_temporal_resolution(self):
         """
@@ -103,18 +106,20 @@ class Sounding:
         temporal_resolution : float
             temporal resolution
         """
-        time_differences = np.abs(np.diff(np.ma.compressed(self.profile.time)))
+        time_differences = np.abs(
+            np.diff(np.ma.compressed(self.profile.flight_time))
+        ) / np.timedelta64(1, "s")
         time_differences_counts = np.bincount(time_differences.astype(np.int))
         most_common_diff = np.argmax(time_differences_counts)
         temporal_resolution = most_common_diff
         self.meta_data["temporal_resolution"] = temporal_resolution
 
-    def generate_sounding_id(self):
+    def generate_sounding_id(self, config):
         """Generate unique id of sounding"""
-        id = self.config.level1.sounding_id.format.format(
+        id = config.level1.variables.sounding_id.format.format(
             direction=self.meta_data["sounding_direction"],
-            lat=self.profile.Latitude.values[0],
-            lon=self.profile.Longitude.values[0],
+            lat=self.profile.latitude.values[0],
+            lon=self.profile.longitude.values[0],
             time=self.meta_data["launch_time_dt"].strftime("%Y%m%d%H%M"),
         )
         self.meta_data["sounding_id"] = id
@@ -130,31 +135,33 @@ class Sounding:
                 )
             )
 
-    def calculate_additional_variables(self):
+    def calculate_additional_variables(self, config):
         """Calculation of additional variables"""
         # Ascent rate
         self.calc_ascent_rate()
         # Dew point temperature
         dewpoint = td.convert_rh_to_dewpoint(
-            self.profile.Temperature.values, self.profile.Humidity.values
+            self.profile.temperature.values, self.profile.humidity.values
         )
-        self.profile["dew_point"] = dewpoint
+        self.profile.insert(10, "dew_point", dewpoint)
         # Mixing ratio
-        e_s = td.calc_saturation_pressure(self.profile.Temperature.values)
+        e_s = td.calc_saturation_pressure(self.profile.temperature.values)
         mixing_ratio = (
             td.calc_wv_mixing_ratio(self.profile, e_s)
-            * self.profile.Humidity.values
+            * self.profile.humidity.values
             / 100.0
         )
-        self.profile["mixing_ratio"] = mixing_ratio
+        # self.profile["mixing_ratio"] = mixing_ratio
+        self.profile.insert(10, "mixing_ratio", mixing_ratio)
         # Launch time as type(datetime)
-        flight_time_unix = self.profile.flight_time.values.astype(np.float) / 1e9
-        launch_time_unix = flight_time_unix[0]
-        self.meta_data["launch_time_dt"] = num2date(
-            launch_time_unix, "seconds since 1970-01-01"
-        )
+        # flight_time_unix = self.profile.flight_time.values.astype(np.float) / 1e9
+        # launch_time_unix = flight_time_unix[0]
+        # self.meta_data["launch_time_dt"] = num2date(
+        #     launch_time_unix, "seconds since 1970-01-01"
+        # )
+        self.meta_data["launch_time_dt"] = self.profile.flight_time.iloc[0]
         # Resolution
         self.calc_temporal_resolution()
         # Sounding ID
-        self.generate_sounding_id()
+        self.generate_sounding_id(config)
         self.get_sonde_type()

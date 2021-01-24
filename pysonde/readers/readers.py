@@ -7,7 +7,9 @@ import sys
 from functools import partial
 
 import numpy as np
-import reader_helpers as rh
+
+sys.path.append(os.path.dirname(__file__))
+import reader_helpers as rh  # noqa: E402
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import sounding as snd  # noqa: E402
@@ -26,7 +28,7 @@ class MW41:
         self.variable_name_mapping = cfg.level0.dictionary_input
 
     def read(self, mwx_file):
-        def _get_flighttime(start_time, launch_time, radio_time):
+        def _get_flighttime(radio_time, start_time, launch_time):
             """
             f_flighttime = lambda radio_time: start_time + dt.timedelta(
                 seconds=radio_time - np.float(launch_time)
@@ -73,7 +75,7 @@ class MW41:
 
         # Create flight time
         f_flighttime = partial(
-            _get_flighttime(start_time=begin_time_dt, launch_time=launch_time)
+            _get_flighttime, start_time=begin_time_dt, launch_time=launch_time
         )
         pd_snd["flight_time"] = pd_snd.RadioRxTimePk.apply(f_flighttime)
 

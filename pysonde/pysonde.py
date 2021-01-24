@@ -6,7 +6,6 @@ Script to convert sounding files from different sources
 to netCDF
 """
 import argparse
-import glob
 import logging
 import os
 import sys
@@ -15,8 +14,8 @@ import tqdm
 from omegaconf import OmegaConf
 
 sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.join(os.path.dirname(__file__), "readers"))
 import _helpers as h  # noqa: E402
-import readers  # noqa: E402
 
 
 def get_args():
@@ -57,20 +56,21 @@ def get_args():
         "--config",
         metavar="MAIN_CONFIG.YML",
         help="Main config file with references\n" "to specific config files",
-        default="./main.yaml",
+        default="../config/main.yaml",
         required=False,
         type=h.unixpath,
     )
 
-    parsed_args = vars(parser.parse_args())
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        metavar="DEBUG",
+        help="Set the level of verbosity [DEBUG, INFO," " WARNING, ERROR]",
+        required=False,
+        default="INFO",
+    )
 
-    if (parsed_args["inputpath"] is not None) and (
-        parsed_args["inputfile"] is not None
-    ):
-        parser.error(
-            "either --inputpath or --inputfile should be used. Use --inputpath"
-            "for several files and --inputfile for single ones"
-        )
+    parsed_args = vars(parser.parse_args())
 
     if parsed_args["inputfile"] is None:
         parser.error(
@@ -88,9 +88,9 @@ def find_files(arg_input):
     if isinstance(arg_input, list) and len(arg_input) > 1:
         filelist = arg_input
     elif isinstance(arg_input, list) and len(arg_input) == 1:
-        filelist = glob.glob(arg_input[0])
+        filelist = h.expand_pathglobs(arg_input[0])
     elif isinstance(arg_input, str):
-        filelist = glob.glob(arg_input)
+        filelist = h.expand_pathglobs(arg_input)
     else:
         raise ValueError
     return sorted(filelist)
@@ -102,7 +102,9 @@ def load_reader(filename):
     """
     ending = filename.suffix
     if ending == ".mwx":
-        reader = readers.reader.MW41
+        from readers.readers import MW41
+
+        reader = MW41
     else:
         raise h.ReaderNotImplemented(f"Reader for filetype {ending} not implemented")
     return reader
@@ -133,7 +135,7 @@ def main(args=None):
 
     for ifile, file in enumerate(tqdm.tqdm(input_files)):
         logging.debug("Reading file number {}".format(ifile))
-        sounding = reader(file)
+        sounding = reader.read(file)
         # Split sounding into ascending and descending branch
         sounding_asc, sounding_dsc = sounding.split_by_direction()
         for snd in [sounding_asc, sounding_dsc]:
@@ -145,8 +147,8 @@ def main(args=None):
                     )
                 )
                 continue
+            snd.calculate_additional_variables(cfg)
             snd.convert_sounding_pd2xr()
-            snd.calculate_additional_variables()
 
 
 if __name__ == "__main__":

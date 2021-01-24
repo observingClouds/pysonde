@@ -159,6 +159,6 @@ variables:
     sounding_id:
         attrs:
             long_name: "sounding identifier"
-        format: ${platform}"__{direction}__{lat:3.2f}_{lon:4.2f}__{time}"
+        format: ${main.platform}__{direction}__{lat:3.2f}_{lon:4.2f}__{time}
         coordinates:
             - sounding

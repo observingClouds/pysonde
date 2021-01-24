@@ -197,8 +197,11 @@ def get_sounding_profile(file, keys):
 
 
 def get_sounding_metadata(file, keys):
-    itemlist = read_xml(file, keys)
+    itemlist = read_xml(file, False)
     sounding_meta_dict = {}
+    import pdb
+
+    pdb.set_trace()
     for i, item in enumerate(itemlist):
         assert (
             i == 0
@@ -206,7 +209,7 @@ def get_sounding_metadata(file, keys):
         for var in keys:
             try:
                 sounding_meta_dict[var] = item.attributes[var].value
-            except KeyError:
+            except (KeyError):
                 warnings.warn(
                     "Attribute {} could not found and is assumed to be RS41-SGP".format(
                         var
