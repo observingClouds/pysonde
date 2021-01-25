@@ -64,4 +64,9 @@ setup(
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
     ],
+    entry_points={
+        "console_scripts": [
+            "sounding_converter=pysonde.pysonde:main",
+        ]
+    },
 )

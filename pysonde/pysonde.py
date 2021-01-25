@@ -7,15 +7,12 @@ to netCDF
 """
 import argparse
 import logging
-import os
 import sys
 
 import tqdm
 from omegaconf import OmegaConf
 
-sys.path.append(os.path.dirname(__file__))
-sys.path.append(os.path.join(os.path.dirname(__file__), "readers"))
-import _helpers as h  # noqa: E402
+from . import _helpers as h
 
 
 def get_args():
@@ -102,7 +99,7 @@ def load_reader(filename):
     """
     ending = filename.suffix
     if ending == ".mwx":
-        from readers.readers import MW41
+        from .readers.readers import MW41
 
         reader = MW41
     else:
