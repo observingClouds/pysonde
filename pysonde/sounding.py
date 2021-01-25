@@ -2,13 +2,12 @@
 """
 import logging
 
+# sys.path.append(os.path.dirname(__file__))
+import _dataset_creator as dc
 import numpy as np
+import thermodynamics as td
 import xarray as xr
 from omegaconf import OmegaConf
-
-# sys.path.append(os.path.dirname(__file__))
-from . import _dataset_creator as dc
-from . import thermodynamics as td
 
 
 class SondeTypeNotImplemented(Exception):
