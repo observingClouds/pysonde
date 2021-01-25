@@ -148,7 +148,11 @@ def main(args=None):
                 )
                 continue
             snd.calculate_additional_variables(cfg)
-            snd.convert_sounding_pd2xr()
+            snd.convert_sounding_df2ds()
+            snd.create_dataset(cfg)
+            import pdb
+
+            pdb.set_trace()
 
 
 if __name__ == "__main__":

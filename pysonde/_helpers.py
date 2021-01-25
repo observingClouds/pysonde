@@ -80,4 +80,5 @@ def combine_configs(config_dict):
     for config, path in config_dict.items():
         configs[config] = OmegaConf.load(path)
     cfg = OmegaConf.merge(configs)
+    # cfg = OmegaConf.to_container(cfg, resolve=True)
     return cfg

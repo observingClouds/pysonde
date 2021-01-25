@@ -1,14 +1,14 @@
 """Sounding class
 """
 import logging
-import os
-import sys
 
 import numpy as np
 import xarray as xr
+from omegaconf import OmegaConf
 
-sys.path.append(os.path.dirname(__file__))
-import thermodynamics as td  # noqa: E402
+# sys.path.append(os.path.dirname(__file__))
+from . import _dataset_creator as dc
+from . import thermodynamics as td
 
 
 class SondeTypeNotImplemented(Exception):
@@ -68,7 +68,7 @@ class Sounding:
 
         return sounding_ascent, sounding_descent
 
-    def convert_sounding_pd2xr(self):
+    def convert_sounding_df2ds(self):
         self.profile = xr.Dataset.from_dataframe(self.profile)
 
     def calc_ascent_rate(self):
@@ -80,11 +80,7 @@ class Sounding:
         time_delta = np.diff(self.profile.flight_time) / np.timedelta64(1, "s")
         height_delta = np.diff(self.profile.height)
         ascent_rate = height_delta / time_delta
-        # ascent_rate = np.diff(self.profile.height) / (
-        #    np.diff(self.profile.flight_time.astype(np.float) / 1e9)
-        # )
         ascent_rate_ = np.concatenate(([0], ascent_rate))  # 0 at first measurement
-        # self.profile["ascent_rate"] = ascent_rate_
         self.profile.insert(10, "ascent_rate", ascent_rate_)
 
     def calc_temporal_resolution(self):
@@ -151,17 +147,50 @@ class Sounding:
             * self.profile.humidity.values
             / 100.0
         )
-        # self.profile["mixing_ratio"] = mixing_ratio
         self.profile.insert(10, "mixing_ratio", mixing_ratio)
-        # Launch time as type(datetime)
-        # flight_time_unix = self.profile.flight_time.values.astype(np.float) / 1e9
-        # launch_time_unix = flight_time_unix[0]
-        # self.meta_data["launch_time_dt"] = num2date(
-        #     launch_time_unix, "seconds since 1970-01-01"
-        # )
         self.meta_data["launch_time_dt"] = self.profile.flight_time.iloc[0]
         # Resolution
         self.calc_temporal_resolution()
         # Sounding ID
         self.generate_sounding_id(config)
         self.get_sonde_type()
+
+    def create_dataset(self, config):
+        # Create new dataset
+        runtime_cfg = OmegaConf.create(
+            {"sounding_dimension": 1, "level_dimension": len(self.profile.flight_time)}
+        )
+        import pdb
+
+        pdb.set_trace()
+        meta_data_cfg = OmegaConf.create(self.meta_data)
+        ds = dc.create_dataset(
+            OmegaConf.merge(runtime_cfg, config.level1, meta_data_cfg)
+        )
+
+        # for var in ds.data_vars:
+        #     ds[var].data =
+        ds.flight_time.data = xr.DataArray(
+            [self.profile.flight_time], dims=["sounding", "level"]
+        )
+        self.dataset = ds
+
+    #     sounding = self.profile
+    #     xr_output = xr.Dataset()
+    #     xr_output['launch_time'] = xr.DataArray([self.meta_data["launch_time_dt"]], dims=['sounding'])
+    #     xr_output['flight_time'] = xr.DataArray([sounding.flight_time], dims=['sounding', 'level'])
+    #     xr_output['sounding'] = xr.DataArray([self.meta_data["sounding_id"]], dims=['sounding'])
+    #     xr_output['ascentRate'] = xr.DataArray([sounding.ascent_rate], dims=['sounding', 'level'])
+    #     # xr_output['altitude'] = xr.DataArray([sounding.GeometricHeight.values], dims = ['sounding', 'level']) # This is different to BUFR
+    #     xr_output['pressure'] = xr.DataArray([xr_snd.Pressure.values], dims=['sounding', 'level'])
+    #     xr_output['altitude'] = xr.DataArray([xr_snd.Height.values], dims=['sounding', 'level'])
+    #     xr_output['temperature'] = xr.DataArray([xr_snd.Temperature.values - 273.15], dims=['sounding', 'level'])
+    #     xr_output['humidity'] = xr.DataArray([xr_snd.Humidity.values], dims=['sounding', 'level'])
+    #     xr_output['dewPoint'] = xr.DataArray([dewpoint - 273.15], dims=['sounding', 'level'])
+    #     xr_output['mixingRatio'] = xr.DataArray([mixing_ratio], dims=['sounding', 'level'])
+    #     xr_output['windSpeed'] = xr.DataArray([xr_snd.WindSpeed.values], dims=['sounding', 'level'])
+    #     xr_output['windDirection'] = xr.DataArray([xr_snd.WindDir.values], dims=['sounding', 'level'])
+    #     xr_output['latitude'] = xr.DataArray([xr_snd.Latitude.values], dims=['sounding', 'level'])
+    #     xr_output['longitude'] = xr.DataArray([xr_snd.Longitude.values], dims=['sounding', 'level'])
+    #     xr_output['altitude_WGS84'] = xr.DataArray([xr_snd.Altitude.values], dims=['sounding', 'level'])
+    # #     xr_output['standard_level_flag'] = xr.DataArray()

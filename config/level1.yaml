@@ -1,8 +1,8 @@
 global_attrs:
-    title: "${EUREC4A} level 1 sounding data"
+    title: ${main.campaign} level 1 sounding data
     description: ???
-    campaign_id: ${campaign_id}
-    platform: ${platform}
+    campaign_id: ${main.campaign_id}
+    platform: ${main.platform}
     instrument: "Radiosonde RS41-SGP by Vaisala"
     instrument_id: "Vaisala-RS"
     number_of_probe: ${number_of_prope}
