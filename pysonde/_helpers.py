@@ -76,9 +76,6 @@ def combine_configs(config_dict):
     """
     Combine Omega configs given as dictionary
     """
-    configs = {}
-    for config, path in config_dict.items():
-        configs[config] = OmegaConf.load(path)
-    cfg = OmegaConf.merge(configs)
-    # cfg = OmegaConf.to_container(cfg, resolve=True)
-    return cfg
+    return OmegaConf.merge(
+        {config: OmegaConf.load(path) for config, path in config_dict.items()}
+    )
