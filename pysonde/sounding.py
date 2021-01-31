@@ -2,8 +2,8 @@
 """
 import logging
 
-# sys.path.append(os.path.dirname(__file__))
 import _dataset_creator as dc
+import _helpers as h
 import numpy as np
 import thermodynamics as td
 import xarray as xr
@@ -157,15 +157,15 @@ class Sounding:
     def create_dataset(self, config):
         # Create new dataset
         runtime_cfg = OmegaConf.create(
-            {"sounding_dimension": 1, "level_dimension": len(self.profile.flight_time)}
+            {"runtime": {"sounding_dim": 1, "level_dim": len(self.profile.flight_time)}}
         )
-        import pdb
 
-        pdb.set_trace()
-        meta_data_cfg = OmegaConf.create(self.meta_data)
-        ds = dc.create_dataset(
-            OmegaConf.merge(runtime_cfg, config.level1, meta_data_cfg)
+        meta_data_cfg = OmegaConf.create(
+            {"meta_level0": h.remove_nontype_keys(self.meta_data, type("str"))}
         )
+        merged_conf = OmegaConf.merge(config.level1, meta_data_cfg, runtime_cfg)
+        merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg, runtime_cfg))
+        ds = dc.create_dataset(merged_conf)
 
         # for var in ds.data_vars:
         #     ds[var].data =

@@ -36,10 +36,17 @@ the one above, e.g.
 """
 import logging
 
+import _helpers as h
 import xarray as xr
 
 
 def create_dataset(cfg):
+    """
+    Create dataset based on template
+
+    cfg : OmegaConf
+        Config containing dataset template
+    """
     ds = xr.Dataset()
     ds = set_global_attrs(cfg, ds)
     ds = set_coords(cfg, ds)
@@ -50,7 +57,8 @@ def create_dataset(cfg):
 def set_global_attrs(cfg, ds):
     logging.debug("Add global attributes")
     if "global_attrs" in cfg.keys():
-        ds.attrs = cfg["global_attrs"]
+        _cfg = h.remove_missing_cfg(cfg["global_attrs"])
+        ds.attrs = _cfg
     return ds
 
 

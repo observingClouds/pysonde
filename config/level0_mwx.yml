@@ -36,3 +36,5 @@ dictionary_input: # variable_name_in_file: variable_name_in_software
     "WindInterpolated" : "wind_interp_flag"
     "Latitude" : "latitude"
     "Longitude" : "longitude"
+    "SerialNbr" : "number_of_probe"
+    "Frequency" : "sonde_frequency"

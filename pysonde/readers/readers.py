@@ -70,8 +70,12 @@ class MW41:
             sounding_meta_dict = rh.get_sounding_metadata(
                 radio_filename, self.radiosondes_values
             )
+            sounding_meta_dict["source"] = str(mwx_file)
 
         pd_snd = rh.rename_variables(pd_snd, self.variable_name_mapping)
+        sounding_meta_dict = rh.rename_metadata(
+            sounding_meta_dict, self.variable_name_mapping
+        )
 
         # Create flight time
         f_flighttime = partial(

@@ -5,12 +5,12 @@ global_attrs:
     platform: ${main.platform}
     instrument: "Radiosonde RS41-SGP by Vaisala"
     instrument_id: "Vaisala-RS"
-    number_of_probe: ${number_of_prope}
-    sonde_type: ${sonde_type}
-    sonde_frequency: ${sonde_frequency}
-    source: ${source_level_1}
+    number_of_probe: ${meta_level0.number_of_probe}
+    sonde_type: ${meta_level0.sonde_type}
+    sonde_frequency: ${meta_level0.sonde_frequency}
+    source: ${meta_level0.source}
     doi: "10.205326/137"
-    version: ${dataset_version}
+    version: ???
     featureType: "trajectory"
     Conventions: "CF-1.7"
 
@@ -20,10 +20,11 @@ coordinates:
             cf_role : "trajecotry_id"
             long_name: "sounding identifier"
             description: "unique string describing the soundings origin (PLATFORM_SND-DIRECTION_LAT_LON_TIME)"
-        dimension: ${sounding_dim}
+        dimension: ${runtime.sounding_dim}
     level:
-        attrs: ???
-        dimension: ${level_dim}
+        attrs:
+            long_name: "sounding height"
+        dimension: ${runtime.level_dim}
 variables:
     launch_time:
         attrs:

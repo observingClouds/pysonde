@@ -79,3 +79,25 @@ def combine_configs(config_dict):
     return OmegaConf.merge(
         {config: OmegaConf.load(path) for config, path in config_dict.items()}
     )
+
+
+def remove_nontype_keys(dict, allowed_type=type("str")):
+    """
+    Remove keys from dictionary that have another type
+    than the once allowed.
+    """
+    return {k: v for (k, v) in dict.items() if isinstance(v, allowed_type)}
+
+
+def remove_missing_cfg(cfg):
+    """
+    Remove config keys that are missing
+    """
+    return_cfg = {}
+    for k in cfg.keys():
+        if OmegaConf.is_missing(cfg, k):
+            logging.warning(f"key {k} is missing and skipped")
+            pass
+        else:
+            return_cfg[k] = cfg[k]
+    return OmegaConf.create(return_cfg)

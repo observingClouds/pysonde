@@ -231,3 +231,17 @@ def rename_variables(sounding, variable_dict):
             rename_dict[var] = variable_dict[var]
     sounding = sounding.rename(columns=rename_dict)
     return sounding
+
+
+def rename_metadata(meta_dict, variable_dict):
+    """Rename variables of sounding metadata
+    according to key, value pairs in
+    variable dict
+    """
+    updated_dict = {}
+    for var in meta_dict.keys():
+        if var in variable_dict.keys():
+            updated_dict[variable_dict[var]] = meta_dict[var]
+        else:
+            updated_dict[var] = meta_dict[var]
+    return updated_dict
