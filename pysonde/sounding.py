@@ -167,12 +167,43 @@ class Sounding:
         merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg, runtime_cfg))
         ds = dc.create_dataset(merged_conf)
 
-        # for var in ds.data_vars:
-        #     ds[var].data =
         ds.flight_time.data = xr.DataArray(
             [self.profile.flight_time], dims=["sounding", "level"]
         )
+
+        #
+        unset_vars = []
+        for k in ds.data_vars.keys():
+            try:
+                dims = ds[k].dims
+                if "sounding" == dims[0]:
+                    ds[k].data = [
+                        self.profile[config.level1.variables[k].internal_varname].values
+                    ]
+                elif "sounding" == dims[1]:
+                    ds[k].data = np.array(
+                        [
+                            self.profile[
+                                config.level1.variables[k].internal_varname
+                            ].values
+                        ]
+                    ).T
+                else:
+                    ds[k].data = self.profile[
+                        config.level1.variables[k].internal_varname
+                    ].values
+            except KeyError:
+                unset_vars.append(k)
+
+        # for var in unset_vars:
+        #     try:
+        #         ds[k].data = config.
         self.dataset = ds
+
+        print("debug here")
+        import pdb
+
+        pdb.set_trace()
 
     #     sounding = self.profile
     #     xr_output = xr.Dataset()

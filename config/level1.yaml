@@ -35,6 +35,7 @@ variables:
             calendar: "proleptic_gregorian"
         coordinates:
             - sounding
+        internal_varname : "launch_time"
     flight_time:
         attrs:
             long_name: "time at pressure level"
@@ -46,6 +47,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "flight_time"
     dz:
         attrs:
             long_name: "ascent/descent rate of measuring device"
@@ -56,6 +58,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "ascent_rate"
     p:
         attrs:
             standard_name: "air_pressure"
@@ -66,6 +69,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "pressure"
     alt:
         attrs:
             standard_name: "geopotential_height"
@@ -77,6 +81,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "height"
     ta:
         attrs:
             standard_name: "air_temperature"
@@ -87,6 +92,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "temperature"
     rh:
         attrs:
             standard_name: "relative_humidity"
@@ -97,6 +103,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "humidity"
     dp:
         attrs:
             standard_name: "dew_point_temperature"
@@ -107,6 +114,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "dew_point"
     mr:
         attrs:
             standard_name: "humidity_mixing_ratio"
@@ -117,6 +125,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "mixing_ratio"
     wspd:
         attrs:
             standard_name: "wind_speed"
@@ -127,6 +136,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "wind_speed"
     wdir:
         attrs:
             standard_name: "wind_from_direction"
@@ -137,6 +147,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "wind_direction"
     lat:
         attrs:
             standard_name: "latitude"
@@ -147,6 +158,7 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "latitude"
     lon:
         attrs:
             standard_name: "latitude"
@@ -157,9 +169,11 @@ variables:
         coordinates:
             - sounding
             - level
+        internal_varname : "longitude"
     sounding_id:
         attrs:
             long_name: "sounding identifier"
         format: ${main.platform}__{direction}__{lat:3.2f}_{lon:4.2f}__{time}
         coordinates:
             - sounding
+        internal_varname : "sounding_id"
