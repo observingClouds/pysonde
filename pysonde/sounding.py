@@ -1,6 +1,8 @@
 """Sounding class
 """
 import logging
+import os
+from pathlib import Path
 
 import _dataset_creator as dc
 import _helpers as h
@@ -171,8 +173,8 @@ class Sounding:
             [self.profile.flight_time], dims=["sounding", "level"]
         )
 
-        #
-        unset_vars = []
+        # Fill dataset with data
+        unset_vars = {}
         for k in ds.data_vars.keys():
             try:
                 dims = ds[k].dims
@@ -193,34 +195,34 @@ class Sounding:
                         config.level1.variables[k].internal_varname
                     ].values
             except KeyError:
-                unset_vars.append(k)
+                unset_vars[k] = config.level1.variables[k].internal_varname
 
-        # for var in unset_vars:
-        #     try:
-        #         ds[k].data = config.
+        for var_out, var_int in unset_vars.items():
+            if var_int == "launch_time":
+                ds[var_out].data = [self.meta_data["launch_time_dt"]]
+            elif var_int == "sounding_id":
+                lat = self.profile["latitude"][0].values
+                lon = self.profile["longitude"][0].values
+                direction = self.meta_data["sounding_direction"]
+                time = self.meta_data["launch_time_dt"]
+                id_fmt = config.level1.variables[var_int].format
+                id = id_fmt.format(lat=lat, lon=lon, direction=direction)
+                id = time.strftime(id)
+                ds[var_out].data = [id]
         self.dataset = ds
 
-        print("debug here")
-        import pdb
-
-        pdb.set_trace()
-
-    #     sounding = self.profile
-    #     xr_output = xr.Dataset()
-    #     xr_output['launch_time'] = xr.DataArray([self.meta_data["launch_time_dt"]], dims=['sounding'])
-    #     xr_output['flight_time'] = xr.DataArray([sounding.flight_time], dims=['sounding', 'level'])
-    #     xr_output['sounding'] = xr.DataArray([self.meta_data["sounding_id"]], dims=['sounding'])
-    #     xr_output['ascentRate'] = xr.DataArray([sounding.ascent_rate], dims=['sounding', 'level'])
-    #     # xr_output['altitude'] = xr.DataArray([sounding.GeometricHeight.values], dims = ['sounding', 'level']) # This is different to BUFR
-    #     xr_output['pressure'] = xr.DataArray([xr_snd.Pressure.values], dims=['sounding', 'level'])
-    #     xr_output['altitude'] = xr.DataArray([xr_snd.Height.values], dims=['sounding', 'level'])
-    #     xr_output['temperature'] = xr.DataArray([xr_snd.Temperature.values - 273.15], dims=['sounding', 'level'])
-    #     xr_output['humidity'] = xr.DataArray([xr_snd.Humidity.values], dims=['sounding', 'level'])
-    #     xr_output['dewPoint'] = xr.DataArray([dewpoint - 273.15], dims=['sounding', 'level'])
-    #     xr_output['mixingRatio'] = xr.DataArray([mixing_ratio], dims=['sounding', 'level'])
-    #     xr_output['windSpeed'] = xr.DataArray([xr_snd.WindSpeed.values], dims=['sounding', 'level'])
-    #     xr_output['windDirection'] = xr.DataArray([xr_snd.WindDir.values], dims=['sounding', 'level'])
-    #     xr_output['latitude'] = xr.DataArray([xr_snd.Latitude.values], dims=['sounding', 'level'])
-    #     xr_output['longitude'] = xr.DataArray([xr_snd.Longitude.values], dims=['sounding', 'level'])
-    #     xr_output['altitude_WGS84'] = xr.DataArray([xr_snd.Altitude.values], dims=['sounding', 'level'])
-    # #     xr_output['standard_level_flag'] = xr.DataArray()
+    def export(self, output_fmt, cfg):
+        """
+        Saves sounding to disk
+        """
+        output = output_fmt.format(
+            platform=cfg.main.platform,
+            campaign=cfg.main.campaign,
+            campaign_id=cfg.main.campaign_id,
+            direction=self.meta_data["sounding_direction"],
+        )
+        output = self.meta_data["launch_time_dt"].strftime(output)
+        directory = os.path.dirname(output)
+        Path(directory).mkdir(parents=True, exist_ok=True)
+        self.dataset.to_netcdf(output)
+        logging.info(f"Sounding written to {output}")

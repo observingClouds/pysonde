@@ -199,9 +199,7 @@ def get_sounding_profile(file, keys):
 def get_sounding_metadata(file, keys):
     itemlist = read_xml(file, False)
     sounding_meta_dict = {}
-    import pdb
 
-    pdb.set_trace()
     for i, item in enumerate(itemlist):
         assert (
             i == 0

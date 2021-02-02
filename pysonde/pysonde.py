@@ -30,7 +30,7 @@ def get_args():
 
     parser.add_argument(
         "-o",
-        "--outputfolder",
+        "--output",
         metavar="/some/example/path/",
         help="Output folder for converted files (netCDF). You can\n"
         " although not recommended also define an output file\n"
@@ -40,8 +40,7 @@ def get_args():
         "\t {platform}\t platform name\n"
         "\t {location}\t platform location\n"
         "\t {direction}\t sounding direction\n"
-        "\t {date}\t\t date of sounding release\n"
-        "\t\t or self defined date format with\n"
+        "\t\t date format with\n"
         "\t\t %%Y%%m%%d %%H%%M and so on\n"
         "\t\t and others to format the output folder dynamically.",
         default=None,
@@ -147,6 +146,7 @@ def main(args=None):
             snd.calculate_additional_variables(cfg)
             snd.convert_sounding_df2ds()
             snd.create_dataset(cfg)
+            snd.export(args["output"], cfg)
 
 
 if __name__ == "__main__":
