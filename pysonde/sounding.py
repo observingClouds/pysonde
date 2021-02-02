@@ -1,5 +1,6 @@
 """Sounding class
 """
+import copy
 import logging
 import os
 from pathlib import Path
@@ -28,10 +29,10 @@ class Sounding:
         """Split sounding into ascending and descending branch"""
         # Simple approach
         sounding_ascent = Sounding(
-            self.profile.loc[self.profile.Dropping == 0], self.meta_data
+            self.profile.loc[self.profile.Dropping == 0], copy.deepcopy(self.meta_data)
         )
         sounding_descent = Sounding(
-            self.profile.loc[self.profile.Dropping == 1], self.meta_data
+            self.profile.loc[self.profile.Dropping == 1], copy.deepcopy(self.meta_data)
         )
 
         # Bugfix 17
