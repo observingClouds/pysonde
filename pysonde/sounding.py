@@ -114,13 +114,13 @@ class Sounding:
 
     def generate_sounding_id(self, config):
         """Generate unique id of sounding"""
-        id = config.level1.variables.sounding_id.format.format(
+        id = config.level1.variables.sounding.format.format(
             direction=self.meta_data["sounding_direction"],
             lat=self.profile.latitude.values[0],
             lon=self.profile.longitude.values[0],
             time=self.meta_data["launch_time_dt"].strftime("%Y%m%d%H%M"),
         )
-        self.meta_data["sounding_id"] = id
+        self.meta_data["sounding"] = id
 
     def get_sonde_type(self):
         """Get WMO sonde type"""
@@ -201,7 +201,7 @@ class Sounding:
         for var_out, var_int in unset_vars.items():
             if var_int == "launch_time":
                 ds[var_out].data = [self.meta_data["launch_time_dt"]]
-            elif var_int == "sounding_id":
+            elif var_int == "sounding":
                 lat = self.profile["latitude"][0].values
                 lon = self.profile["longitude"][0].values
                 direction = self.meta_data["sounding_direction"]

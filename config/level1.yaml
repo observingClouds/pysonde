@@ -16,10 +16,6 @@ global_attrs:
 
 coordinates:
     sounding:
-        attrs:
-            cf_role : "trajecotry_id"
-            long_name: "sounding identifier"
-            description: "unique string describing the soundings origin (PLATFORM_SND-DIRECTION_LAT_LON_TIME)"
         dimension: ${runtime.sounding_dim}
     level:
         attrs:
@@ -31,6 +27,7 @@ variables:
             standard_name: "time"
             long_name: "time at which the sounding started"
         encodings:
+            dtype: "float64"
             units: "seconds since 2020-01-01"
             calendar: "proleptic_gregorian"
         coordinates:
@@ -44,6 +41,7 @@ variables:
         encodings:
             units: "seconds since 2020-01-01"
             calendar: "proleptic_gregorian"
+            dtype: "float64"
         coordinates:
             - sounding
             - level
@@ -52,9 +50,11 @@ variables:
         attrs:
             long_name: "ascent/descent rate of measuring device"
             description: "ascent rate is positive/ decent rate is negative"
+            units: "m/s"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
             units: "m/s"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -63,9 +63,11 @@ variables:
         attrs:
             standard_name: "air_pressure"
             long_name: "pressure"
+            units: "Pa"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
             units: "Pa"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -75,9 +77,10 @@ variables:
             standard_name: "geopotential_height"
             long_name: "geopotential height retrieved from PTU"
             positive: "up"
+            units: "m"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
-            units: "m"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -86,9 +89,10 @@ variables:
         attrs:
             standard_name: "air_temperature"
             long_name: "dry bulb temperature"
+            units: "K"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
-            units: "K"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -97,9 +101,10 @@ variables:
         attrs:
             standard_name: "relative_humidity"
             long_name: "relative humidity"
+            units: "1"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
-            units: "1"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -108,9 +113,10 @@ variables:
         attrs:
             standard_name: "dew_point_temperature"
             long_name: "dew point temperature"
+            units: "K"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
-            units: "K"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -119,9 +125,10 @@ variables:
         attrs:
             standard_name: "humidity_mixing_ratio"
             long_name: "water vapor mixing ratio"
+            units: "kg/kg"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
-            units: "kg/kg"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -130,9 +137,10 @@ variables:
         attrs:
             standard_name: "wind_speed"
             long_name: "wind speed"
+            units: "m/s"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
-            units: "m/s"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -141,9 +149,10 @@ variables:
         attrs:
             standard_name: "wind_from_direction"
             long_name: "wind direction"
+            units: "degree"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
-            units: "degree"
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -153,8 +162,9 @@ variables:
             standard_name: "latitude"
             long_name: "latitude"
             axis: "Y"
-        encodings:
             units: "degrees_north"
+        encodings:
+            dtype: "float32"
         coordinates:
             - sounding
             - level
@@ -164,15 +174,20 @@ variables:
             standard_name: "latitude"
             long_name: "latitude"
             axis: "Y"
-        encodings:
             units: "degrees_north"
+        encodings:
+            dtype: "float32"
         coordinates:
             - sounding
             - level
         internal_varname : "longitude"
-    sounding_id:
+    sounding:
         attrs:
+            cf_role: "trajecotry_id"
             long_name: "sounding identifier"
+            description: "unique string describing the soundings origin (PLATFORM_SND-DIRECTION_LAT_LON_TIME)"
+        encodings:
+            dtype: "str"
         format: ${main.platform}__{direction}__{lat:3.2f}_{lon:4.2f}__%Y%m%d%H%M
         coordinates:
             - sounding

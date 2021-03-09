@@ -84,4 +84,6 @@ def set_variables(cfg, ds):
             ds[var] = xr.DataArray(None, coords=coord_dict, dims=params.coordinates)
             if "attrs" in params.keys():
                 ds[var].attrs = params["attrs"]
+            if "encodings" in params.keys():
+                ds[var].encoding = params["encodings"]
     return ds
