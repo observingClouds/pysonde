@@ -10,6 +10,8 @@ def convert_rh_to_dewpoint(t_kelvin, rh):
     following the formula used by the Vaisala
     M41 sounding system
     """
+    import pdb; pdb.set_trace()
+    if type(t_kelvin)
     assert np.any(t_kelvin > 100), "Temperature seems to be not given in Kelvin"
     kelvin = 15 * np.log(100 / rh) - 2 * (t_kelvin - 273.15) + 2711.5
     t_dew = t_kelvin * 2 * kelvin / (t_kelvin * np.log(100 / rh) + 2 * kelvin)

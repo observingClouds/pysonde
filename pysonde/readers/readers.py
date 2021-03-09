@@ -26,6 +26,7 @@ class MW41:
         self.sync_sounding_values = cfg.level0.sync_sounding_items
         self.radiosondes_values = cfg.level0.radiosondes_sounding_items
         self.variable_name_mapping = cfg.level0.dictionary_input
+        self.units = cfg.level0.input_units
 
     def read(self, mwx_file):
         def _get_flighttime(radio_time, start_time, launch_time):
@@ -76,6 +77,21 @@ class MW41:
         sounding_meta_dict = rh.rename_metadata(
             sounding_meta_dict, self.variable_name_mapping
         )
+
+        # Attach units where provided
+        import pandas as pd
+        import pint
+
+        pd_snd_w_units = pd.DataFrame()
+        for var in pd_snd.columns:
+            if var in self.units.keys():
+                pd_snd_w_units[var] = pd.Series(
+                    pd_snd[var].values, dtype=f"pint[{self.units[var]}]"
+                )
+            else:
+                # no units found
+                pd_snd_w_units[var] = pd_snd[var].values
+        pd_snd = pd_snd_w_units
 
         # Create flight time
         f_flighttime = partial(
