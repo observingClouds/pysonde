@@ -86,7 +86,7 @@ def open_mwx(mwx_file):
         within the archive file
     """
     tmpdir, tmpdir_obj = getTmpDir()
-    decompressed_files = np.array(decompress(mwx_file, tmpdir + "/"))
+    decompressed_files = np.array(decompress(mwx_file, os.path.join(tmpdir, "")))
     return decompressed_files
 
 
@@ -108,7 +108,9 @@ class MWX(object):
 
     def __init__(self, mwx_file):
         self.tmpdir, self.tmpdir_obj = getTmpDir()
-        self.decompressed_files = np.array(decompress(mwx_file, self.tmpdir + "/"))
+        self.decompressed_files = np.array(
+            decompress(mwx_file, os.path.join(self.tmpdir, ""))
+        )
 
     def __enter__(self):
         return self
