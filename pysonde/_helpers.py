@@ -49,7 +49,9 @@ def replace_placeholders_cfg(cfg, subset="level1"):
         cfg[subset].global_attrs["history"] = (
             cfg[subset]
             .global_attrs["history"]
-            .format(version=version, script=__file__, date=str(time.ctime(time.time())))
+            .format(
+                version=version, package="pysonde", date=str(time.ctime(time.time()))
+            )
         )
     if "version" in cfg[subset].keys():
         version = get_version()
