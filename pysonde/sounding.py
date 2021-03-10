@@ -176,7 +176,7 @@ class Sounding:
 
         # Fill dataset with data
         unset_vars = {}
-        for k in ds.data_vars.keys():
+        for k in {**ds.coords, **ds.data_vars}.keys():
             try:
                 dims = ds[k].dims
                 if "sounding" == dims[0]:
@@ -197,6 +197,9 @@ class Sounding:
                     ].values
             except KeyError:
                 unset_vars[k] = config.level1.variables[k].internal_varname
+            except AttributeError:
+                logging.debug(f"{k} does not seem to have an internal varname")
+                pass
 
         for var_out, var_int in unset_vars.items():
             if var_int == "launch_time":
@@ -209,7 +212,10 @@ class Sounding:
                 id_fmt = config.level1.variables[var_int].format
                 id = id_fmt.format(lat=lat, lon=lon, direction=direction)
                 id = time.strftime(id)
-                ds[var_out].data = [id]
+                try:
+                    ds[var_out].data = [id]
+                except ValueError:
+                    ds = ds.assign_coords({var_out: [id]})
         self.dataset = ds
 
     def export(self, output_fmt, cfg):
