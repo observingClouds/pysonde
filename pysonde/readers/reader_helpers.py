@@ -3,9 +3,9 @@
 import glob
 import os
 import shutil
-import subprocess
 import tempfile
 import warnings
+import zipfile
 from typing import Optional, Type, Union
 from xml.dom import minidom
 
@@ -54,10 +54,10 @@ def decompress(file, tmp_folder):
     """
     Decompress file to temporary folder
     """
-    decompress_command = ["unzip", file, "-d", tmp_folder]
-    _ = subprocess.check_output(decompress_command)
+    with zipfile.ZipFile(file) as z:
+        z.extractall(tmp_folder)
+    decompressed_files = sorted(glob.glob(os.path.join(f"{tmp_folder}", "*")))
 
-    decompressed_files = sorted(glob.glob(f"{tmp_folder}/*"))
     return decompressed_files
 
 
