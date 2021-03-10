@@ -41,9 +41,6 @@ def replace_placeholders_cfg(cfg, subset="level1"):
     Replace placeholders in config that only exist during
     runtime e.g. time, version, ...
     """
-    import pdb
-
-    pdb.set_trace()
     if "history" in cfg[subset].global_attrs.keys():
         version = get_version()
         cfg[subset].global_attrs["history"] = (
