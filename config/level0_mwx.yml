@@ -38,3 +38,11 @@ dictionary_input: # variable_name_in_file: variable_name_in_software
     "Longitude" : "longitude"
     "SerialNbr" : "number_of_probe"
     "Frequency" : "sonde_frequency"
+input_units:  # data units in radiosonde files (mwx)
+    "pressure" : "hPa"
+    "temperature" : "K"
+    "humidity" : "percent"
+    "wind_direction" : "degree"
+    "wind_speed" : "m/s"
+    "v" : "m/s"
+    "u" : "m/s"
