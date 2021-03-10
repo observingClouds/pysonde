@@ -2,7 +2,6 @@
 Thermodynamic functions
 """
 import numpy as np
-import pint
 import pint_pandas as pp
 
 # ureg = pint.UnitRegistry()

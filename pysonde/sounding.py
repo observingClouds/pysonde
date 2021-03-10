@@ -8,12 +8,13 @@ from pathlib import Path
 import _dataset_creator as dc
 import _helpers as h
 import numpy as np
-import pint
 import pint_pandas
 import pint_xarray
 import thermodynamics as td
 import xarray as xr
 from omegaconf import OmegaConf
+
+logging.debug(f"Pint_xarray version:{pint_xarray.__version__}")
 
 
 class SondeTypeNotImplemented(Exception):
