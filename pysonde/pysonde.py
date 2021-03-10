@@ -120,6 +120,8 @@ def main(args=None):
     main_cfg = OmegaConf.load(args["config"])
     cfg = h.combine_configs(main_cfg.configs)
 
+    cfg = h.replace_placeholders_cfg(cfg)
+
     input_files = find_files(args["inputfile"])
     logging.info("Files to process {}".format([file.name for file in input_files]))
 

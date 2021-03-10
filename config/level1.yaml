@@ -11,6 +11,7 @@ global_attrs:
     source: ${meta_level0.source}
     doi: "10.205326/137"
     version: ???
+    history: created with {script} ({version}) on {date}
     featureType: "trajectory"
     Conventions: "CF-1.7"
 

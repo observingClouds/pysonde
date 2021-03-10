@@ -1,6 +1,8 @@
 import inspect
 import logging
 import platform
+import subprocess as sp
+import time
 from pathlib import Path, PureWindowsPath
 
 from omegaconf import OmegaConf
@@ -8,6 +10,54 @@ from omegaconf import OmegaConf
 
 class ReaderNotImplemented(Exception):
     pass
+
+
+def get_version():
+    logging.debug("Gathering version information")
+    version = "--"
+    try:
+        import pysonde
+
+        version = pysonde.__version__
+    except (ModuleNotFoundError, AttributeError):
+        logging.debug("No pysonde package version found")
+
+    try:
+        version = (
+            sp.check_output(
+                ["git", "describe", "--always", "--dirty"], stderr=sp.STDOUT
+            )
+            .strip()
+            .decode()
+        )
+    except (sp.CalledProcessError, FileNotFoundError):
+        logging.debug("No git-version could be found.")
+
+    return version
+
+
+def replace_placeholders_cfg(cfg, subset="level1"):
+    """
+    Replace placeholders in config that only exist during
+    runtime e.g. time, version, ...
+    """
+    import pdb
+
+    pdb.set_trace()
+    if "history" in cfg[subset].global_attrs.keys():
+        version = get_version()
+        cfg[subset].global_attrs["history"] = (
+            cfg[subset]
+            .global_attrs["history"]
+            .format(version=version, script=__file__, date=str(time.ctime(time.time())))
+        )
+    if "version" in cfg[subset].keys():
+        version = get_version()
+        cfg[subset].global_attrs["version"] = (
+            cfg[subset].global_attrs["version"].format(version=version)
+        )
+
+    return cfg
 
 
 def unixpath(path_in):
