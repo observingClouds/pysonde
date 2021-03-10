@@ -111,4 +111,5 @@ class MW41:
         sounding.meta_data["launch_time"] = launch_time
         sounding.meta_data["begin_time"] = begin_time_dt
         sounding.meta_data["station_altitude"] = station_altitude
+        sounding.unitregistry = ureg
         return sounding

@@ -5,36 +5,45 @@ import numpy as np
 import pint
 import pint_pandas as pp
 
-ureg = pint.UnitRegistry()
+# ureg = pint.UnitRegistry()
+# ureg.define("fraction = [] = frac")
+# ureg.define("percent = 1e-2 frac = pct")
+# pp.PintType.ureg = ureg
 
 
-def convert_rh_to_dewpoint(t_kelvin, rh):
+def convert_rh_to_dewpoint(temperature, rh):
     """
     Convert T and RH to dewpoint exactly
     following the formula used by the Vaisala
     M41 sounding system
+
+    Input
+    -----
+    temperature : array
+        temperature in Kevlin or supported quantity
     """
-    if isinstance(t_kelvin, pp.pint_array.PintArray):
-        t_kelvin = t_kelvin.quantity.to(
+    if isinstance(temperature, pp.pint_array.PintArray):
+        ureg = temperature.units._REGISTRY
+        temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
     if isinstance(rh, pp.pint_array.PintArray):
-        rh = rh.quantity.to("dimensionless").magnitude
-    assert np.any(t_kelvin > 100), "Temperature seems to be not given in Kelvin"
-    kelvin = 15 * np.log(100 / rh) - 2 * (t_kelvin - 273.15) + 2711.5
-    t_dew = t_kelvin * 2 * kelvin / (t_kelvin * np.log(100 / rh) + 2 * kelvin)
-    if isinstance(t_kelvin, pp.pint_array.PintArray):
+        rh = rh.quantity.to("percent").magnitude
+    assert np.any(temperature_K > 100), "Temperature seems to be not given in Kelvin"
+    kelvin = 15 * np.log(100 / rh) - 2 * (temperature_K - 273.15) + 2711.5
+    t_dew = temperature_K * 2 * kelvin / (temperature_K * np.log(100 / rh) + 2 * kelvin)
+    if isinstance(temperature, pp.pint_array.PintArray):
         t_dew = t_dew * ureg["K"]
     return t_dew
 
 
-def calc_saturation_pressure(temperature_K, method="hardy1998"):
+def calc_saturation_pressure(temperature, method="hardy1998"):
     """
     Calculate saturation water vapor pressure
 
     Input
     -----
-    temperature_K : array
+    temperature : array
         array of temperature in Kevlin or dew point temperature for actual vapor pressure
     method : str
         Formula used for calculating the saturation pressure
@@ -56,10 +65,12 @@ def calc_saturation_pressure(temperature_K, method="hardy1998"):
     >>> calc_saturation_pressure([273.15, 293.15, 253.15])
     array([  611.2129107 ,  2339.26239586,   125.58350529])
     """
-    if isinstance(temperature_K, pp.pint_array.PintArray):
-        temperature_K = temperature_K.quantity.to(
+    if isinstance(temperature, pp.pint_array.PintArray):
+        temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
+    else:
+        temperature_K = temperature
     if method == "hardy1998":
         g = np.empty(8)
         g[0] = -2.8365744 * 10 ** 3
@@ -78,7 +89,7 @@ def calc_saturation_pressure(temperature_K, method="hardy1998"):
                 7
             ] * np.log(temp)
             e_sw[t] = np.exp(ln_e_sw)
-        if isinstance(temperature_K, pp.pint_array.PintArray):
+        if isinstance(temperature, pp.pint_array.PintArray):
             e_sw = pp.PintArray(e_sw, dtype="Pa")
         return e_sw
 
@@ -88,15 +99,18 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
     Calculate water vapor mixing ratio
     """
     if isinstance(vapor_pressure, pp.pint_array.PintArray):
-        vapor_pressure = vapor_pressure.quantity.to("Pa").magnitude
+        ureg = vapor_pressure.units._REGISTRY
+        vapor_pressure_Pa = vapor_pressure.quantity.to("Pa").magnitude
+    else:
+        vapor_pressure_Pa = vapor_pressure
     if "pint" in sounding.pressure.dtype.__str__():
         total_pressure = sounding.pressure.pint.quantity.to("hPa").magnitude
     else:
         total_pressure = sounding.pressure
     wv_mix_ratio = 1000.0 * (
-        (0.622 * vapor_pressure) / (100.0 * total_pressure - vapor_pressure)
+        (0.622 * vapor_pressure_Pa) / (100.0 * total_pressure - vapor_pressure_Pa)
     )
     if isinstance(vapor_pressure, pp.pint_array.PintArray):
-        return wv_mix_ratio * ureg("kg") / ureg("kg")
+        return wv_mix_ratio * ureg("g") / ureg("kg")
     else:
         return wv_mix_ratio

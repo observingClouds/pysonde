@@ -8,6 +8,9 @@ from pathlib import Path
 import _dataset_creator as dc
 import _helpers as h
 import numpy as np
+import pint
+import pint_pandas
+import pint_xarray
 import thermodynamics as td
 import xarray as xr
 from omegaconf import OmegaConf
@@ -20,19 +23,24 @@ class SondeTypeNotImplemented(Exception):
 class Sounding:
     """Sounding class with processing functions"""
 
-    def __init__(self, profile=None, meta_data={}, config=None):
+    def __init__(self, profile=None, meta_data={}, config=None, ureg=None):
         self.profile = profile
         self.meta_data = meta_data
         self.config = config
+        self.unitregistry = ureg
 
     def split_by_direction(self, method="maxHeight"):
         """Split sounding into ascending and descending branch"""
         # Simple approach
         sounding_ascent = Sounding(
-            self.profile.loc[self.profile.Dropping == 0], copy.deepcopy(self.meta_data)
+            self.profile.loc[self.profile.Dropping == 0],
+            copy.deepcopy(self.meta_data),
+            ureg=copy.deepcopy(self.unitregistry),
         )
         sounding_descent = Sounding(
-            self.profile.loc[self.profile.Dropping == 1], copy.deepcopy(self.meta_data)
+            self.profile.loc[self.profile.Dropping == 1],
+            copy.deepcopy(self.meta_data),
+            ureg=copy.deepcopy(self.unitregistry),
         )
 
         # Bugfix 17
@@ -71,7 +79,20 @@ class Sounding:
         return sounding_ascent, sounding_descent
 
     def convert_sounding_df2ds(self):
+        unit_dict = {}
+        for var in self.profile.columns:
+            if type(self.profile[var].dtype) == pint_pandas.pint_array.PintType:
+                unit_dict[var] = self.profile[var].pint.units
+                self.profile[var] = self.profile[var].pint.magnitude
+
         self.profile = xr.Dataset.from_dataframe(self.profile)
+
+        if self.unitregistry is not None:
+            self.unitregistry.force_ndarray_like = True
+
+        for var, unit in unit_dict.items():
+            self.profile[var].attrs["units"] = unit.__str__()
+        self.profile = self.profile.pint.quantify(unit_registry=self.unitregistry)
 
     def calc_ascent_rate(self):
         """
@@ -144,11 +165,17 @@ class Sounding:
         self.profile.insert(10, "dew_point", dewpoint)
         # Mixing ratio
         e_s = td.calc_saturation_pressure(self.profile.temperature.values)
-        mixing_ratio = (
-            td.calc_wv_mixing_ratio(self.profile, e_s)
-            * self.profile.humidity.values
-            / 100.0
-        )
+        if "pint" in e_s.dtype.__str__():
+            mixing_ratio = (
+                td.calc_wv_mixing_ratio(self.profile, e_s)
+                * self.profile.humidity.values
+            )
+        else:
+            mixing_ratio = (
+                td.calc_wv_mixing_ratio(self.profile, e_s)
+                * self.profile.humidity.values
+                / 100.0
+            )
         self.profile.insert(10, "mixing_ratio", mixing_ratio)
         self.meta_data["launch_time_dt"] = self.profile.flight_time.iloc[0]
         # Resolution
@@ -178,23 +205,55 @@ class Sounding:
         unset_vars = {}
         for k in ds.data_vars.keys():
             try:
+                isquantity = (
+                    self.profile[config.level1.variables[k].internal_varname].pint.units
+                    is not None
+                )
+
                 dims = ds[k].dims
                 if "sounding" == dims[0]:
-                    ds[k].data = [
-                        self.profile[config.level1.variables[k].internal_varname].values
-                    ]
-                elif "sounding" == dims[1]:
-                    ds[k].data = np.array(
-                        [
+                    if isquantity:  # convert values to output unit
+                        ds[k].data = [
+                            self.profile[config.level1.variables[k].internal_varname]
+                            .pint.to(ds[k].attrs["units"])
+                            .pint.magnitude
+                        ]
+                    else:
+                        ds[k].data = [
                             self.profile[
                                 config.level1.variables[k].internal_varname
                             ].values
                         ]
-                    ).T
+                elif "sounding" == dims[1]:
+                    if isquantity:  # convert values to output unit
+                        ds[k].data = np.array(
+                            [
+                                self.profile[
+                                    config.level1.variables[k].internal_varname
+                                ]
+                                .pint.to(ds[k].attrs["units"])
+                                .pint.magnitude
+                            ]
+                        ).T
+                    else:
+                        ds[k].data = np.array(
+                            [
+                                self.profile[
+                                    config.level1.variables[k].internal_varname
+                                ].values
+                            ]
+                        ).T
                 else:
-                    ds[k].data = self.profile[
-                        config.level1.variables[k].internal_varname
-                    ].values
+                    if isquantity:
+                        ds[k].data = (
+                            self.profile[config.level1.variables[k].internal_varname]
+                            .pint.to(ds[k].attrs["units"])
+                            .pint.magnitude
+                        )
+                    else:
+                        ds[k].data = self.profile[
+                            config.level1.variables[k].internal_varname
+                        ].values
             except KeyError:
                 unset_vars[k] = config.level1.variables[k].internal_varname
 
