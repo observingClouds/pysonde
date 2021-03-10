@@ -1,6 +1,13 @@
 # pySonde
 
 ## Setup
+```
+pip install -r requirements.txt
+python setup.py sdist
+pip install dist/pysonde*.tar.gz
+```
+
+For development
 ```sh
 # Install dependencies
 pipenv install --dev
@@ -10,10 +17,16 @@ pipenv run pre-commit install -t pre-commit
 pipenv run pre-commit install -t pre-push
 ```
 
-```
-python setup.py sdist
-pip install dist/pysonde*.tar.gz
+## Usage
+
+A few example files are automatically installed and can be used to test if the installation was successful
+
+Unix:
+```sh
+sounding_converter -i examples/level0/BCO_20200126_224454.mwx -o "test_{direction}.nc" -c config/main.yaml
 ```
 
-## Credits
-This package was created with Cookiecutter and the [sourcery-ai/python-best-practices-cookiecutter](https://github.com/sourcery-ai/python-best-practices-cookiecutter) project template.
+Windows:
+```sh
+sounding_converter.exe -i examples/level0/BCO_20200126_224454.mwx -o "test_{direction}.nc" -c config/main.yaml
+```
