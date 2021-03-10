@@ -41,7 +41,7 @@ dictionary_input: # variable_name_in_file: variable_name_in_software
 input_units:  # data units in radiosonde files
     "pressure" : "hPa"
     "temperature" : "K"
-    "humidity" : "pct"
+    "humidity" : "percent"
     "wind_direction" : "degree"
     "wind_speed" : "m/s"
     "v" : "m/s"

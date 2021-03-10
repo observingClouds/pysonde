@@ -81,13 +81,18 @@ class MW41:
         # Attach units where provided
         import pandas as pd
         import pint
+        import pint_pandas as pp
+
+        ureg = pint.UnitRegistry()
+        ureg.define("fraction = [] = frac")
+        ureg.define("percent = 1e-2 frac = pct")
+        pp.PintType.ureg = ureg
+        PA_ = pp.PintArray
 
         pd_snd_w_units = pd.DataFrame()
         for var in pd_snd.columns:
             if var in self.units.keys():
-                pd_snd_w_units[var] = pd.Series(
-                    pd_snd[var].values, dtype=f"pint[{self.units[var]}]"
-                )
+                pd_snd_w_units[var] = PA_(pd_snd[var].values, dtype=self.units[var])
             else:
                 # no units found
                 pd_snd_w_units[var] = pd_snd[var].values
