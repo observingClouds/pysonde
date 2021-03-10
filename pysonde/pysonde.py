@@ -109,10 +109,12 @@ def load_reader(filename):
 def main(args=None):
     if args is None:
         args = {}
-    try:
-        args = get_args()
-    except ValueError:
-        sys.exit()
+        try:
+            args = get_args()
+        except ValueError:
+            sys.exit()
+    else:
+        pass
 
     h.setup_logging(args["verbose"])
 
