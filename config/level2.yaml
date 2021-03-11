@@ -186,7 +186,7 @@ variables:
             units: "K"
             coordinates: "lon lat flight_time launch_time"
             ancillary_variables: "N_ptu m_ptu"
-            cell_methods: "alt: mean (interval: 10 m comment: m_ptu)";
+            cell_methods: "alt: mean (interval: 10 m comment: m_ptu)"
         encodings:
             dtype: "float32"
         coordinates:
@@ -255,7 +255,7 @@ variables:
             units: "K"
             coordinates: "lon lat flight_time launch_time"
             ancillary_variables: "N_ptu m_ptu"
-            cell_methods: "alt: mean (interval: 10 m comment: m_ptu)";
+            cell_methods: "alt: mean (interval: 10 m comment: m_ptu)"
         encodings:
             dtype: "float32"
         coordinates:
