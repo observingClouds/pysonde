@@ -1,3 +1,8 @@
+setup:
+    interpolation_grid_min: 0
+    interpolation_grid_max: 31000
+    interpolation_grid_inc: 10
+    max_gap_fill: 50
 global_attrs:
     title: ${main.campaign} level 2 sounding data
     description: ???
@@ -30,6 +35,7 @@ variables:
             bounds: "alt_bnds"
         encodings:
             dtype: "int8"
+            _FillValue: False
         coordinates:
             - alt
         internal_varname: "altitude"
@@ -39,6 +45,7 @@ variables:
             comment: "(lower bound, upper bound]"
         encodings:
             dtype: "int8"
+            _FillValue: False
         coordinates:
             - alt
             - nv
@@ -212,7 +219,7 @@ variables:
         coordinates:
             - sounding
             - alt
-        invernal_varname: "u"
+        invernal_varname: "wind_u"
     v:
         attrs:
             standard_name: "northward_wind"
@@ -226,7 +233,7 @@ variables:
         coordinates:
             - sounding
             - alt
-        invernal_varname: "v"
+        invernal_varname: "wind_v"
     mr:
         attrs:
             standard_name: "humidity_mixing_ratio"
