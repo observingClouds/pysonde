@@ -172,10 +172,10 @@ variables:
         internal_varname : "latitude"
     lon:
         attrs:
-            standard_name: "latitude"
-            long_name: "latitude"
-            axis: "Y"
-            units: "degrees_north"
+            standard_name: "longitude"
+            long_name: "longitude"
+            axis: "X"
+            units: "degrees_east"
         encodings:
             dtype: "float32"
         coordinates:
