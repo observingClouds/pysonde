@@ -11,6 +11,7 @@ from xml.dom import minidom
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 
 
 class VariableNotFoundInSounding(Warning):
@@ -225,11 +226,21 @@ def rename_variables(sounding, variable_dict):
     according to key, value pairs in
     variable dict
     """
+    if isinstance(sounding, xr.core.dataset.Dataset):
+        vars = list(sounding.data_vars.keys())
+        vars.extend(list(sounding.coords.keys()))
+    else:
+        vars = sounding.columns
     rename_dict = {}
-    for var in sounding.columns:
+    for var in vars:
         if var in variable_dict.keys():
             rename_dict[var] = variable_dict[var]
-    sounding = sounding.rename(columns=rename_dict)
+
+    if isinstance(sounding, xr.core.dataset.Dataset):
+        sounding = sounding.rename(rename_dict)
+    else:
+        sounding = sounding.rename(columns=rename_dict)
+
     return sounding
 
 

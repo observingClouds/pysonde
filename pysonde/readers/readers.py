@@ -7,6 +7,9 @@ import sys
 from functools import partial
 
 import numpy as np
+import pandas as pd  # noqa: F401
+import pint
+import pint_pandas as pp
 import pint_xarray  # noqa: F401
 import xarray as xr
 
@@ -81,10 +84,6 @@ class MW41:
         )
 
         # Attach units where provided
-        import pandas as pd
-        import pint
-        import pint_pandas as pp
-
         ureg = pint.UnitRegistry()
         ureg.define("fraction = [] = frac")
         ureg.define("percent = 1e-2 frac = pct")

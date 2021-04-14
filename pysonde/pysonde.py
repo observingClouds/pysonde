@@ -9,10 +9,12 @@ import argparse
 import logging
 import sys
 
+import numpy as np
 import tqdm
 from omegaconf import OmegaConf
 
 from . import _helpers as h
+from . import readers
 
 
 def get_args():
@@ -86,6 +88,10 @@ def load_reader(filename):
         from .readers.readers import MW41
 
         reader = MW41
+    elif ending == ".nc":
+        from .readers.readers import pysondeL1
+
+        reader = pysondeL1
     else:
         raise h.ReaderNotImplemented(f"Reader for filetype {ending} not implemented")
     return reader
@@ -121,21 +127,62 @@ def main(args=None):
     for ifile, file in enumerate(tqdm.tqdm(input_files)):
         logging.debug("Reading file number {}".format(ifile))
         sounding = reader.read(file)
-        # Split sounding into ascending and descending branch
-        sounding_asc, sounding_dsc = sounding.split_by_direction()
-        for snd in [sounding_asc, sounding_dsc]:
-            if len(snd.profile) < 2:
-                logging.warning(
-                    "Sounding ({}) does not contain data. "
-                    "Skip sounding-direction of {}".format(
-                        snd.meta_data["sounding_direction"], file
+
+        if isinstance(reader, readers.readers.MW41):
+            # Split sounding into ascending and descending branch
+            sounding_asc, sounding_dsc = sounding.split_by_direction()
+            for snd in [sounding_asc, sounding_dsc]:
+                if len(snd.profile) < 2:
+                    logging.warning(
+                        "Sounding ({}) does not contain data. "
+                        "Skip sounding-direction of {}".format(
+                            snd.meta_data["sounding_direction"], file
+                        )
                     )
+                    continue
+                snd.calculate_additional_variables(cfg)
+                snd.convert_sounding_df2ds()
+                snd.create_dataset(cfg)
+                snd.export(args["output"], cfg)
+        elif isinstance(reader, readers.readers.pysondeL1):
+            if len(sounding.sounding) != 1:
+                raise NotImplementedError(
+                    "Level 1 files with more than one sounding are currently not supported"
                 )
-                continue
-            snd.calculate_additional_variables(cfg)
-            snd.convert_sounding_df2ds()
-            snd.create_dataset(cfg)
-            snd.export(args["output"], cfg)
+            ds = sounding.isel({"sounding": 0})
+            # ds_input = ds.copy()
+
+            # Check monotonic ascent/descent
+            if np.all(np.diff(ds.isel(level=slice(20, -1)).dz.values) > 0) or np.all(
+                np.diff(ds.isel(level=slice(20, -1)).dz.values) < 0
+            ):
+                logging.debug("Sounding is monotonic ascending/descending")
+            else:
+                logging.warning(
+                    "Sounding is not monotonic ascending/descending. The ascent rate will be artificial"
+                )
+
+            # Geopotential height issue
+            # the geopotential height is not a measured coordinate and
+            # the same height can occur at different pressure levels
+            # here the first occurrence is used
+            _, uniq_altitude_idx = np.unique(ds.dz.values, return_index=True)
+            ds = ds.isel({"level": uniq_altitude_idx})
+
+            # Consistent platform test
+            if ifile == 0:
+                platform = ds.platform
+            else:
+                assert (
+                    ds.platform == platform
+                ), "The platform seems to change from {} to {}".format(
+                    platform, ds.platform
+                )
+
+            # Unique levels test
+            if len(ds.dz) != len(np.unique(ds.dz)):
+                print("Altitude levels are not unique of {}".format(file))
+                break
 
 
 if __name__ == "__main__":
