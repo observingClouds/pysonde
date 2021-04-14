@@ -71,6 +71,21 @@ def unixpath(path_in):
     return path_out
 
 
+def find_files(arg_input):
+    """
+    Find files to convert
+    """
+    if isinstance(arg_input, list) and len(arg_input) > 1:
+        filelist = arg_input
+    elif isinstance(arg_input, list) and len(arg_input) == 1:
+        filelist = expand_pathglobs(arg_input[0])
+    elif isinstance(arg_input, str):
+        filelist = expand_pathglobs(arg_input)
+    else:
+        raise ValueError
+    return sorted(filelist)
+
+
 def expand_pathglobs(pathparts, basepaths=None):
     """
     from https://stackoverflow.com/questions/51108256/how-to-take-a-pathname-string-with-wildcards-and-resolve-the-glob-with-pathlib
