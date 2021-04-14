@@ -140,7 +140,19 @@ class pysondeL1:
 
     def read(self, L1_file):
         """Read level 1 file"""
+        ureg = pint.UnitRegistry()
+        ureg.force_ndarray_like = True
+        ureg.define("fraction = [] = frac")
+        ureg.define("percent = 1e-2 frac = pct")
+        ureg.define("degrees_east = degree")
+        ureg.define("degrees_north = degree")
+        pint_xarray.unit_Registry = ureg
+
         ds = xr.open_dataset(L1_file)
-        ds = ds.pint.quantify()  # Apply units to dataset
+        ds = ds.pint.quantify(
+            unit_registry=ureg
+        )  # Apply units to dataset (requires currently pip install git+https://github.com/xarray-contrib/pint-xarray@7518c844a034361c1f8921d74bc5f9a96fec1910 --ignore-requires-python
+
+        rh.rename_variables(ds, self.variable_name_mapping)
 
         return ds
