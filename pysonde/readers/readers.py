@@ -7,6 +7,8 @@ import sys
 from functools import partial
 
 import numpy as np
+import pint_xarray  # noqa: F401
+import xarray as xr
 
 sys.path.append(os.path.dirname(__file__))
 import reader_helpers as rh  # noqa: E402
@@ -113,3 +115,33 @@ class MW41:
         sounding.meta_data["station_altitude"] = station_altitude
         sounding.unitregistry = ureg
         return sounding
+
+
+class pysondeL1:
+    """
+    Reader for level 1 data created with pysonde
+    """
+
+    def __init__(self, cfg):
+        """Configure reader"""
+        # Configure, which values need to be read and how they are named
+        self.variable_name_mapping = self._get_variable_name_mapping(cfg["level1"])
+
+    def _get_variable_name_mapping(self, cfg_l1):
+        variables = cfg_l1["variables"]
+
+        mapping_dict = {}
+        for var_ext, var_dict in variables.items():
+            try:
+                var_int = var_dict["internal_varname"]
+            except KeyError:
+                logging.error("Internal varname is not defined for var {var_ext}.")
+            mapping_dict[var_ext] = var_int
+        return mapping_dict
+
+    def read(self, L1_file):
+        """Read level 1 file"""
+        ds = xr.open_dataset(L1_file)
+        ds = ds.pint.quantify()  # Apply units to dataset
+
+        return ds
