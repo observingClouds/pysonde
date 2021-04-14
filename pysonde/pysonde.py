@@ -77,21 +77,6 @@ def get_args():
     return parsed_args
 
 
-def find_files(arg_input):
-    """
-    Find files to convert
-    """
-    if isinstance(arg_input, list) and len(arg_input) > 1:
-        filelist = arg_input
-    elif isinstance(arg_input, list) and len(arg_input) == 1:
-        filelist = h.expand_pathglobs(arg_input[0])
-    elif isinstance(arg_input, str):
-        filelist = h.expand_pathglobs(arg_input)
-    else:
-        raise ValueError
-    return sorted(filelist)
-
-
 def load_reader(filename):
     """
     Infer appropriate reader from filename
@@ -124,7 +109,7 @@ def main(args=None):
 
     cfg = h.replace_placeholders_cfg(cfg)
 
-    input_files = find_files(args["inputfile"])
+    input_files = h.find_files(args["inputfile"])
     logging.info("Files to process {}".format([file.name for file in input_files]))
 
     logging.debug("Load reader. All files need to be of same type!")
