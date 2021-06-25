@@ -190,10 +190,10 @@ class Sounding:
         runtime_cfg = OmegaConf.create(
             {"runtime": {"sounding_dim": 1, "level_dim": len(self.profile.flight_time)}}
         )
-        
+
         meta_data_cfg = OmegaConf.create(
             {"meta_level0": h.remove_nontype_keys(self.meta_data, type("str"))}
-            )
+        )
         # meta_data_cfg = OmegaConf.create({"meta_level0": self.meta_data})
         merged_conf = OmegaConf.merge(config.level1, meta_data_cfg, runtime_cfg)
         merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg, runtime_cfg))
@@ -202,7 +202,7 @@ class Sounding:
         ds.flight_time.data = xr.DataArray(
             [self.profile.flight_time], dims=["sounding", "level"]
         )
-        
+
         # Fill dataset with data
         unset_vars = {}
         for k in {**ds.coords, **ds.data_vars}.keys():
@@ -277,14 +277,14 @@ class Sounding:
                     ds[var_out].data = [id]
                 except ValueError:
                     ds = ds.assign_coords({var_out: [id]})
-        
-        merged_conf = h.replace_placeholders_cfg(self,merged_conf)
-        
+
+        merged_conf = h.replace_placeholders_cfg(self, merged_conf)
+
         logging.debug("Add global attributes")
         if "global_attrs" in merged_conf.keys():
             _cfg = h.remove_missing_cfg(merged_conf["global_attrs"])
             ds.attrs = _cfg
-        
+
         self.dataset = ds
 
     def export(self, output_fmt, cfg):
