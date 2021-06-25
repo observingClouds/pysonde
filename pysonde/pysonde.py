@@ -133,6 +133,7 @@ def main(args=None):
             snd.calculate_additional_variables(cfg)
             snd.convert_sounding_df2ds()
             snd.create_dataset(cfg)
+            # snd.make_quicklooks()
             snd.export(args["output"], cfg)
 
 

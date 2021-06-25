@@ -27,6 +27,7 @@ class MW41:
         # Configure, which values need to be read and how they are named
         self.sync_sounding_values = cfg.level0.sync_sounding_items
         self.radiosondes_values = cfg.level0.radiosondes_sounding_items
+        # self.radiosondes_values = cfg.level0.radiosondes_sounding_items
         self.variable_name_mapping = cfg.level0.dictionary_input
         self.units = cfg.level0.input_units
 

@@ -194,6 +194,7 @@ class Sounding:
         meta_data_cfg = OmegaConf.create(
             {"meta_level0": h.remove_nontype_keys(self.meta_data, type("str"))}
         )
+        # meta_data_cfg = OmegaConf.create({"meta_level0": self.meta_data})
         merged_conf = OmegaConf.merge(config.level1, meta_data_cfg, runtime_cfg)
         merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg, runtime_cfg))
         ds = dc.create_dataset(merged_conf)
