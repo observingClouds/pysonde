@@ -67,7 +67,7 @@ setup(
     entry_points={
         "console_scripts": [
             "sounding_converter=pysonde.pysonde:main",
-            'sounding_visualize=pysonde.make_quicklooks_rs41:main',
+            "sounding_visualize=pysonde.make_quicklooks_rs41:main",
         ]
     },
 )
