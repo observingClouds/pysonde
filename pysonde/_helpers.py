@@ -36,24 +36,53 @@ def get_version():
     return version
 
 
-def replace_placeholders_cfg(cfg, subset="level1"):
+def get_time_launch(self):
+    logging.debug("Gathering time_launch information")
+    time_launch = self.meta_data["launch_time_dt"]
+
+    return time_launch
+
+
+def get_resolution(self):
+    logging.debug("Gathering resolution information")
+    import numpy as np
+
+    tindex = np.ma.masked_invalid(self.profile["flight_time"])
+    _, indices = np.unique(np.diff(tindex), return_inverse=True)
+    timediff = np.diff(tindex) / np.timedelta64(1, "s")
+    time_resolution = timediff[np.argmax(np.bincount(indices))]
+    time_resolution = str(int(time_resolution)) + "s"
+
+    return time_resolution
+
+
+def replace_placeholders_cfg(self, cfg, subset="global_attrs"):
     """
     Replace placeholders in config that only exist during
     runtime e.g. time, version, ...
     """
-    if "history" in cfg[subset].global_attrs.keys():
+    if "history" in cfg[subset].keys():
         version = get_version()
-        cfg[subset].global_attrs["history"] = (
-            cfg[subset]
-            .global_attrs["history"]
-            .format(
-                version=version, package="pysonde", date=str(time.ctime(time.time()))
-            )
+        cfg[subset]["history"] = cfg[subset]["history"].format(
+            version=version, package="pysonde", date=str(time.ctime(time.time()))
         )
     if "version" in cfg[subset].keys():
         version = get_version()
-        cfg[subset].global_attrs["version"] = (
-            cfg[subset].global_attrs["version"].format(version=version)
+        cfg[subset]["version"] = cfg[subset]["version"].format(version=version)
+    if "time_of_launch_HHmmss" in cfg[subset].keys():
+        time_launch = get_time_launch(self).strftime("%H:%M:%S")
+        cfg[subset]["time_of_launch_HHmmss"] = cfg[subset][
+            "time_of_launch_HHmmss"
+        ].format(time_launch=time_launch)
+    if "date_YYYYMMDD" in cfg[subset].keys():
+        day_launch = get_time_launch(self).strftime("%Y-%m-%d")
+        cfg[subset]["date_YYYYMMDD"] = cfg[subset]["date_YYYYMMDD"].format(
+            day_launch=day_launch
+        )
+    if "resolution" in cfg[subset].keys():
+        resolution = get_resolution(self)
+        cfg[subset]["resolution"] = cfg[subset]["resolution"].format(
+            resolution=resolution
         )
 
     return cfg

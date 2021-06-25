@@ -276,6 +276,14 @@ class Sounding:
                     ds[var_out].data = [id]
                 except ValueError:
                     ds = ds.assign_coords({var_out: [id]})
+
+        merged_conf = h.replace_placeholders_cfg(self, merged_conf)
+
+        logging.debug("Add global attributes")
+        if "global_attrs" in merged_conf.keys():
+            _cfg = h.remove_missing_cfg(merged_conf["global_attrs"])
+            ds.attrs = _cfg
+
         self.dataset = ds
 
     def export(self, output_fmt, cfg):

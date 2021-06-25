@@ -48,7 +48,6 @@ def create_dataset(cfg):
         Config containing dataset template
     """
     ds = xr.Dataset()
-    ds = set_global_attrs(cfg, ds)
     ds = set_coords(cfg, ds)
     ds = set_variables(cfg, ds)
     return ds
