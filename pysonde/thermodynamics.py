@@ -2,7 +2,11 @@
 Thermodynamic functions
 """
 import numpy as np
+import metpy
+import metpy.calc as mpcalc
+import pint
 import pint_pandas as pp
+import xarray as xr
 
 # ureg = pint.UnitRegistry()
 # ureg.define("fraction = [] = frac")
@@ -68,6 +72,8 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
         temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
+    elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(temperature.data, "_units"):
+        temperature_K = temperature.pint.to("K").metpy.magnitude
     else:
         temperature_K = temperature
     if method == "hardy1998":
@@ -90,6 +96,8 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
             e_sw[t] = np.exp(ln_e_sw)
         if isinstance(temperature, pp.pint_array.PintArray):
             e_sw = pp.PintArray(e_sw, dtype="Pa")
+        elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(temperature.data, "_units"):
+            e_sw = xr.DataArray(e_sw, dims=temperature.dims, coords=temperature.coords) * metpy.units.units("Pa")
         return e_sw
 
 
@@ -113,3 +121,43 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
         return wv_mix_ratio * ureg("g") / ureg("kg")
     else:
         return wv_mix_ratio
+
+
+def calc_theta_from_T(T, p):
+    """
+    Input :
+        T : temperature
+        p : pressure
+    Output :
+        theta : Potential temperature values
+    Function to estimate potential temperature from the
+    temperature and pressure in the given dataset. This function uses MetPy's
+    functions to get theta:
+    (i) mpcalc.potential_temperature()
+
+    """
+    theta = mpcalc.potential_temperature(p.metpy.quantify(), T.metpy.quantify())
+
+    return theta
+
+
+def calc_T_from_theta(theta, p):
+    """
+    Input :
+        theta : potential temperature (K)
+        p : pressure (hPa)
+    Output :
+        T : Temperature values
+    Function to estimate temperature from potential temperature and pressure,
+    in the given dataset. This function uses MetPy's
+    functions to get T:
+    (i) mpcalc.temperature_from_potential_temperature()
+
+    """
+    T = (
+        mpcalc.temperature_from_potential_temperature(
+            p, theta,
+        )
+    )
+
+    return T

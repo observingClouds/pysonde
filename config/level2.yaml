@@ -219,7 +219,7 @@ variables:
         coordinates:
             - sounding
             - alt
-        invernal_varname: "wind_u"
+        internal_varname: "wind_u"
     v:
         attrs:
             standard_name: "northward_wind"
@@ -233,7 +233,7 @@ variables:
         coordinates:
             - sounding
             - alt
-        invernal_varname: "wind_v"
+        internal_varname: "wind_v"
     mr:
         attrs:
             standard_name: "humidity_mixing_ratio"

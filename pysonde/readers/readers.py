@@ -11,6 +11,7 @@ import pandas as pd  # noqa: F401
 import pint
 import pint_pandas as pp
 import pint_xarray  # noqa: F401
+from metpy.units import units
 import xarray as xr
 
 sys.path.append(os.path.dirname(__file__))
@@ -120,14 +121,14 @@ class pysondeL1:
     """
     Reader for level 1 data created with pysonde
     """
-
     def __init__(self, cfg):
         """Configure reader"""
         # Configure, which values need to be read and how they are named
-        self.variable_name_mapping = self._get_variable_name_mapping(cfg["level1"])
+        self.variable_name_mapping_input = self._get_variable_name_mapping(cfg["level1"])
+        self.variable_name_mapping_output = self._get_variable_name_mapping(cfg["level2"])
 
-    def _get_variable_name_mapping(self, cfg_l1):
-        variables = cfg_l1["variables"]
+    def _get_variable_name_mapping(self, cfg_lev):
+        variables = cfg_lev["variables"]
 
         mapping_dict = {}
         for var_ext, var_dict in variables.items():
@@ -140,12 +141,12 @@ class pysondeL1:
 
     def read(self, L1_file):
         """Read level 1 file"""
-        ureg = pint.UnitRegistry()
+        ureg = units  #pint.UnitRegistry()
         ureg.force_ndarray_like = True
-        ureg.define("fraction = [] = frac")
-        ureg.define("percent = 1e-2 frac = pct")
-        ureg.define("degrees_east = degree")
-        ureg.define("degrees_north = degree")
+        # ureg.define("fraction = [] = frac")
+        # ureg.define("percent = 1e-2 frac = pct")
+        # ureg.define("degrees_east = degree")
+        # ureg.define("degrees_north = degree")
         pint_xarray.unit_Registry = ureg
 
         ds = xr.open_dataset(L1_file)
@@ -153,6 +154,11 @@ class pysondeL1:
             unit_registry=ureg
         )  # Apply units to dataset (requires currently pip install git+https://github.com/xarray-contrib/pint-xarray@7518c844a034361c1f8921d74bc5f9a96fec1910 --ignore-requires-python
 
-        rh.rename_variables(ds, self.variable_name_mapping)
+        rh.rename_variables(ds, self.variable_name_mapping_input)
 
-        return ds
+        # Write to class
+        sounding = snd.Sounding()
+        sounding.profile = ds
+        sounding.unitregistry = ureg
+
+        return sounding
