@@ -30,3 +30,22 @@ Windows:
 ```sh
 sounding_converter.exe -i examples/level0/BCO_20200126_224454.mwx -o "test_{direction}.nc" -c config/main.yaml
 ```
+
+## Simple Plotting
+
+The package also includes a few plotting routines that can be called with e.g.
+
+Unix:
+```sh
+sounding_visualize -i converted/file/sounding.nc
+```
+
+## SkewT Plotting
+
+A skewT diagram can be created with
+
+Unix:
+
+```sh
+sounding_skewT -i converted/file/sounding.nc
+```
