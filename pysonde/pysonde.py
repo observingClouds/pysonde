@@ -164,7 +164,7 @@ def main(args=None):
                 )
             ds = sounding.profile.isel({"sounding": 0})
             ds_input = ds.copy()
-            
+
             # Check monotonic ascent/descent
             if np.all(np.diff(ds.isel(level=slice(20, -1)).alt.values) > 0) or np.all(
                 np.diff(ds.isel(level=slice(20, -1)).alt.values) < 0
@@ -486,6 +486,5 @@ def main(args=None):
                 logging.info('Write output to {}'.format(outfile))
                 h.write_dataset(ds_interp, outfile)
                 
-
 if __name__ == "__main__":
     main()
