@@ -336,6 +336,7 @@ def main(args=None):
                 ds_input.p.load()
                 ds_input = ds_input.reset_coords()
                 
+                """
                 interp_pres = mh.pressure_interpolation(ds_input.p.pint.to("hPa").values,
                                                       ds_input.alt.pint.to("m").values,
                                                       ds_interp.alt.values) * sounding.unitregistry('hPa')
@@ -344,6 +345,7 @@ def main(args=None):
                 ds_interp['pressure'] = xr.DataArray(interp_pres,
                                                      dims=dims_1d,
                                                      coords=coords_1d)
+                """
                 ds_interp['pressure'] = ds_interp['pressure'].pint.to(cfg.level2.variables['p'].attrs.units)
                 ds_interp['pressure'] = ds_interp['pressure'].expand_dims({'sounding':1})
                 
