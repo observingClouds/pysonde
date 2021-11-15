@@ -138,7 +138,7 @@ variables:
         attrs:
             standard_name: "wind_speed"
             long_name: "wind speed"
-            units: "m/s"
+            units: "knots"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
             dtype: "float32"

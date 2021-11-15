@@ -9,16 +9,24 @@ from pysonde.pysonde import main
 
 output_file_fmt = "pytest_output_tmp_{direction}.nc"
 output_files = glob.glob(output_file_fmt.format(direction="*"))
+
 for file in output_files:
     os.remove(file)
+
 main(
     args={
         "inputfile": "examples/level0/BCO_20200126_224454.mwx",
-        "config": "config/main.yaml",
+        #"inputfile": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/examples/level0/4DC8UUK_20210709_014553.mwx",
+        "config": "../config/main.yaml",
+        #"config": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/config/main.yaml",
         "output": output_file_fmt,
+        #"output": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/examples/level2/RV_Sonne_Radiosonde_Level2_20210709T0145_13.8N-22.6E_AscentProfile.nc",
         "verbose": "INFO",
     }
 )
+
+# import pdb;
+# pdb.set_trace()
 
 
 def test_file_consistency():
