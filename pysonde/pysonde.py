@@ -126,7 +126,7 @@ def main(args=None):
     main_cfg = OmegaConf.load(args["config"])
     cfg = h.combine_configs(main_cfg.configs)
 
-    cfg = h.replace_placeholders_cfg(cfg)
+    # cfg = h.replace_placeholders_cfg(cfg)
 
     input_files = h.find_files(args["inputfile"])
     logging.info("Files to process {}".format([file.name for file in input_files]))
@@ -158,6 +158,8 @@ def main(args=None):
                 snd.create_dataset(cfg)
                 snd.export(args["output"], cfg)
         elif isinstance(reader, readers.readers.pysondeL1):
+            cfg = h.replace_placeholders_cfg_level2(cfg)
+            
             if len(sounding.profile.sounding) != 1:
                 raise NotImplementedError(
                     "Level 1 files with more than one sounding are currently not supported"
@@ -268,8 +270,6 @@ def main(args=None):
                                            cfg.level2.setup.interpolation_grid_max,
                                            cfg.level2.setup.interpolation_grid_inc)
             
-            
-            # Hier nochmal schauen, dass linear auch funktioniert
             if args['method'] == 'linear':
                 # Druck logarithmisch interpolieren
                 
@@ -289,11 +289,9 @@ def main(args=None):
                 
                 alt_out = ds_interp.alt.values
                 
-                interp_pres = mh.pressure_interpolation(pres_int_p,
+                interp_pres = mh.pressure_interpolation(pres_int_p, 
                                                         pres_int_a,
                                                         alt_out) * sounding.unitregistry('hPa')
-                # * sounding.unitregistry(cfg.level2.variables['p'].attrs.units)
-                # hier testen, ob ohne neu-interpolierten Druck die RH Daten anders sind
                 
                 ds_interp['pressure'] = xr.DataArray(interp_pres,
                                                      dims=dims_1d,
@@ -302,14 +300,12 @@ def main(args=None):
                 # """
                 for var_in, var_out in reader.variable_name_mapping_output.items():
                     try:
-                        # ds_interp[var_out] = ds_interp[var_out].pint.quantify(ds_new[var_out].data.units)
                         ds_interp[var_out] = ds_interp[var_out].pint.to(cfg.level2.variables[var_in].attrs.units)
                     except:
                         pass
                 
             
             elif args['method'] == 'bin':
-                # auch Druck binnen
                 interpolation_bins = np.arange(cfg.level2.setup.interpolation_grid_min - cfg.level2.setup.interpolation_grid_inc / 2,
                                                cfg.level2.setup.interpolation_grid_max + cfg.level2.setup.interpolation_grid_inc / 2,
                                                cfg.level2.setup.interpolation_grid_inc)
@@ -344,7 +340,6 @@ def main(args=None):
                 
                 wind_u = ds_interp.isel({'sounding': 0})['wind_u']
                 wind_v = ds_interp.isel({'sounding': 0})['wind_v']
-                # umrechnen in m/s
                 dir, wsp = mh.get_directional_wind(wind_u, wind_v)
                                 
                 ds_interp['wind_direction'] = xr.DataArray(dir.expand_dims({'sounding':1}).data,dims=dims_2d,coords=coords_1d)
@@ -374,8 +369,6 @@ def main(args=None):
                 
                 ds_interp['launch_time'] = xr.DataArray([ds_interp.isel({'sounding': 0}).launch_time.item() / 1e9],
                                                         dims=['sounding'])
-                # ds_interp['platform'] = xr.DataArray([ds.platform],
-                #                                      dims=['sounding'])
                 
                 # Calculations after interpolation
                 # Recalculate temperature and relative humidity from theta and q
@@ -402,8 +395,6 @@ def main(args=None):
                 ds_interp['relative_humidity'] = ds_interp['relative_humidity'].expand_dims({'sounding': 1})
                 
                 ds_interp['relative_humidity'].data = ds_interp['relative_humidity'].data * units('%')
-                # ds_interp['relative_humidity'] = ds_interp['relative_humidity'].pint.to(cfg.level2.variables[var_cfg].attrs.units)
-                # ds_interp = ds_interp.drop('humidity')
                 
                 dewpoint = td.convert_rh_to_dewpoint(ds_interp.isel(sounding=0)['temperature'],
                                                      ds_interp.isel(sounding=0)['relative_humidity'])
@@ -446,7 +437,7 @@ def main(args=None):
                                                  restore_coord_dims=True).count().values,
                     dims=dims_2d,
                     coords=coords_1d)
-    
+                
                 # Cell method used
                 data_exists = np.where(np.isnan(ds_interp.isel(sounding=0).pressure), False, True)
                 data_mean = np.where(np.isnan(ds_interp.isel(sounding=0).N_ptu), False, True)  # no data or interp: nan; mean > 0
