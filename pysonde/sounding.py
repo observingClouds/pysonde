@@ -204,6 +204,10 @@ class Sounding:
 
         # Fill dataset with data
         unset_vars = {}
+        
+        # import pdb;
+        # pdb.set_trace()
+        
         for k in {**ds.coords, **ds.data_vars}.keys():
             try:
                 isquantity = (

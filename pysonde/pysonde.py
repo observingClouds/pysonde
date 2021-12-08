@@ -217,7 +217,8 @@ def main(args=None):
             else:
                 logging.warning(
                     'No WGS84 altitude could be found. The averaging of the position might be faulty especially at the 0 meridian and close to the poles')
-
+            
+            # Calculate more thermodynamical variables (used for interpolation)
             td.metpy.units.units = sounding.unitregistry
             theta = td.calc_theta_from_T(ds['ta'], ds['p'])
             e_s = td.calc_saturation_pressure(ds['ta'])
@@ -234,14 +235,12 @@ def main(args=None):
             theta['level'] = ds.alt.data
             theta = theta.rename({'level': 'alt'})
             theta = theta.expand_dims({"sounding": 1})
+            
             ds = ds.rename_vars({"alt":"altitude"})
             ds = ds.rename({'level':'alt'})
             ds['alt'] = ds.altitude.data
             ds = ds.reset_coords()
             ds = ds.expand_dims({"sounding":1})
-            # _ds_launch_time = ds["launch_time"].expand_dims({'sounding': 1})
-            # del ds["launch_time"]
-            # ds["launch_time"] = _ds_launch_time
             
             ds_new = xr.Dataset()  #ds.copy()
             ds_new['mr'] = w.reset_coords(drop=True)
@@ -268,12 +267,49 @@ def main(args=None):
             interpolation_grid = np.arange(cfg.level2.setup.interpolation_grid_min,
                                            cfg.level2.setup.interpolation_grid_max,
                                            cfg.level2.setup.interpolation_grid_inc)
+            
+            
+            # Hier nochmal schauen, dass linear auch funktioniert
             if args['method'] == 'linear':
+                # Druck logarithmisch interpolieren
+                
+                pres_int_p = ds_new.pressure.pint.to("hPa").values[0]
+                pres_int_a = ds_new.altitude.pint.to("m").values[0]
+                
                 ds_new = ds_new.dropna(dim='alt',
-                                       subset=output_variables,
                                        how='any')
-                ds_interp = ds_new.pint.interp(altitude=interpolation_grid)
+                # subset=output_variables,
+                ds_interp = ds_new.interp(alt=interpolation_grid)
+                
+                # Logarithmic Pressure Interpolation
+                # """
+                dims_2d = ['sounding', 'alt']
+                dims_1d = ['alt']
+                coords_1d = {'alt': ds_interp.alt.data}
+                
+                alt_out = ds_interp.alt.values
+                
+                interp_pres = mh.pressure_interpolation(pres_int_p,
+                                                        pres_int_a,
+                                                        alt_out) * sounding.unitregistry('hPa')
+                # * sounding.unitregistry(cfg.level2.variables['p'].attrs.units)
+                # hier testen, ob ohne neu-interpolierten Druck die RH Daten anders sind
+                
+                ds_interp['pressure'] = xr.DataArray(interp_pres,
+                                                     dims=dims_1d,
+                                                     coords=coords_1d)
+                ds_interp['pressure'] = ds_interp['pressure'].expand_dims({'sounding':1})
+                # """
+                for var_in, var_out in reader.variable_name_mapping_output.items():
+                    try:
+                        # ds_interp[var_out] = ds_interp[var_out].pint.quantify(ds_new[var_out].data.units)
+                        ds_interp[var_out] = ds_interp[var_out].pint.to(cfg.level2.variables[var_in].attrs.units)
+                    except:
+                        pass
+                
+            
             elif args['method'] == 'bin':
+                # auch Druck binnen
                 interpolation_bins = np.arange(cfg.level2.setup.interpolation_grid_min - cfg.level2.setup.interpolation_grid_inc / 2,
                                                cfg.level2.setup.interpolation_grid_max + cfg.level2.setup.interpolation_grid_inc / 2,
                                                cfg.level2.setup.interpolation_grid_inc)
@@ -311,9 +347,6 @@ def main(args=None):
                 # umrechnen in m/s
                 dir, wsp = mh.get_directional_wind(wind_u, wind_v)
                                 
-                # import pdb;
-                # pdb.set_trace()
-                
                 ds_interp['wind_direction'] = xr.DataArray(dir.expand_dims({'sounding':1}).data,dims=dims_2d,coords=coords_1d)
                 ds_interp['wind_speed'] = xr.DataArray(wsp.expand_dims({'sounding':1}).data, dims=dims_2d,coords=coords_1d)
                 
@@ -336,17 +369,7 @@ def main(args=None):
                 ds_input.p.load()
                 ds_input = ds_input.reset_coords()
                 
-                """
-                interp_pres = mh.pressure_interpolation(ds_input.p.pint.to("hPa").values,
-                                                      ds_input.alt.pint.to("m").values,
-                                                      ds_interp.alt.values) * sounding.unitregistry('hPa')
-                # * sounding.unitregistry(cfg.level2.variables['p'].attrs.units)
-                # hier testen, ob ohne neu-interpolierten Druck die RH Daten anders sind
-                ds_interp['pressure'] = xr.DataArray(interp_pres,
-                                                     dims=dims_1d,
-                                                     coords=coords_1d)
-                """
-                ds_interp['pressure'] = ds_interp['pressure'].pint.to(cfg.level2.variables['p'].attrs.units)
+                # ds_interp['pressure'] = ds_interp['pressure'].pint.to(cfg.level2.variables['p'].attrs.units)
                 ds_interp['pressure'] = ds_interp['pressure'].expand_dims({'sounding':1})
                 
                 ds_interp['launch_time'] = xr.DataArray([ds_interp.isel({'sounding': 0}).launch_time.item() / 1e9],
@@ -358,7 +381,9 @@ def main(args=None):
                 # Recalculate temperature and relative humidity from theta and q
                 
                 temperature = td.calc_T_from_theta(ds_interp.isel(sounding=0)['theta'].pint.to("K"),
-                                                ds_interp.isel(sounding=0)['pressure'].pint.to("hPa"))
+                                                   ds_interp.isel(sounding=0)['pressure'].pint.to("hPa"))
+                
+                
                 ds_interp['temperature'] = xr.DataArray(temperature.data,
                                                         dims=dims_1d,
                                                         coords=coords_1d)
@@ -370,16 +395,19 @@ def main(args=None):
                 w_s = mpcalc.mixing_ratio(e_s,
                                           ds_interp.isel(sounding=0)['pressure'].data)
                 relative_humidity = w / w_s * 100
-
+                
                 ds_interp['relative_humidity'] = xr.DataArray(relative_humidity.data,
                                                               dims=dims_1d,
                                                               coords=coords_1d)
                 ds_interp['relative_humidity'] = ds_interp['relative_humidity'].expand_dims({'sounding': 1})
-                ds_interp['relative_humidity'].data = ds_interp['relative_humidity'].data * units.percent
+                
+                ds_interp['relative_humidity'].data = ds_interp['relative_humidity'].data * units('%')
+                # ds_interp['relative_humidity'] = ds_interp['relative_humidity'].pint.to(cfg.level2.variables[var_cfg].attrs.units)
                 # ds_interp = ds_interp.drop('humidity')
                 
                 dewpoint = td.convert_rh_to_dewpoint(ds_interp.isel(sounding=0)['temperature'],
                                                      ds_interp.isel(sounding=0)['relative_humidity'])
+                
                 ds_interp['dewpoint'] = xr.DataArray(dewpoint.data,
                                                         dims=dims_1d,
                                                         coords=coords_1d)
@@ -392,6 +420,14 @@ def main(args=None):
                 ds_interp['mixing_ratio'].data = ds_interp['mixing_ratio'].data * units('g/g')
                 ds_interp['specific_humidity'].data = ds_interp['specific_humidity'].data * units('g/g')
                 
+                
+                for var_in, var_out in reader.variable_name_mapping_output.items():
+                    try:
+                        # ds_interp[var_out] = ds_interp[var_out].pint.quantify(ds_new[var_out].data.units)
+                        ds_interp[var_out] = ds_interp[var_out].pint.to(cfg.level2.variables[var_in].attrs.units)
+                    except:
+                        pass
+                    
                 for variable in ['mixing_ratio', 'theta',
                                   'specific_humidity', 'ascent_rate', 'altitude', 'latitude',
                                   'longitude', 'wind_u',
@@ -410,7 +446,7 @@ def main(args=None):
                                                  restore_coord_dims=True).count().values,
                     dims=dims_2d,
                     coords=coords_1d)
-
+    
                 # Cell method used
                 data_exists = np.where(np.isnan(ds_interp.isel(sounding=0).pressure), False, True)
                 data_mean = np.where(np.isnan(ds_interp.isel(sounding=0).N_ptu), False, True)  # no data or interp: nan; mean > 0
@@ -419,7 +455,7 @@ def main(args=None):
                 data_method[np.logical_and(data_exists, ~data_mean)] = 1
                 ds_interp['m_ptu'] = xr.DataArray([data_method], dims=dims_2d, coords=coords_1d)
                 ds_interp['N_ptu'].values[0,np.logical_and(~data_mean, data_method > 0)] = 0
-
+    
                 data_exists = np.where(np.isnan(ds_interp.isel(sounding=0).latitude), False, True)
                 data_mean = np.where(np.isnan(ds_interp.isel(sounding=0).N_gps), False, True)  # no data or interp: nan; mean > 0
                 data_method = np.zeros_like(data_exists, dtype='uint')
@@ -427,17 +463,7 @@ def main(args=None):
                 data_method[np.logical_and(data_exists, ~data_mean)] = 1
                 ds_interp['m_gps'] = xr.DataArray([data_method], dims=dims_2d, coords=coords_1d)
                 ds_interp['N_gps'].values[0,np.logical_and(~data_mean, data_method > 0)] = 0
-                
-                # direction = get_direction(ds_interp, ds)
-                most_common_vertical_movement = np.argmax(
-                    [np.count_nonzero(ds_interp.ascent_rate > 0), np.count_nonzero(ds_interp.ascent_rate < 0)]
-                )
-                ds_interp['ascent_flag'] = xr.DataArray([most_common_vertical_movement], dims=['sounding'])
-                    
-                # # Copy trajectory id from level1 dataset
-                # ds_interp['sounding'] = xr.DataArray([ds['sounding'].values])#, dims=['sounding'])
-                ds_interp.sounding.attrs = ds['sounding'].attrs
-                
+            
                 import pandas as pd
                 from netCDF4 import num2date
         
@@ -451,42 +477,52 @@ def main(args=None):
                 
                 # ds_interp['flight_time'].data = convert_nums2date(ds_interp.flight_time.data, "seconds since 1970-01-01")
                 ds_interp['launch_time'].data = convert_nums2date(ds_interp.launch_time.data, "seconds since 1970-01-01")
-                
-                # merged_conf = OmegaConf.merge(config.level2, meta_data_cfg)
-                # merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg))
-                ds_interp.attrs = ds.attrs
-                
-                ds_interp = h.replace_global_attributes(ds_interp, cfg)
-                ds_interp.attrs["source"] = str(file).split("/")[-1]
-                
-                variables = reader.variable_name_mapping_output.items()
-                ds_interp = h.set_additional_var_attributes(ds_interp, cfg.level2.variables, variables)
-                
-                # Transpose dataset if necessary
-                for variable in ds_interp.data_vars:
-                     if variable == 'alt_bnds': continue
-                     dims = ds_interp[variable].dims
-                     if (len(dims) == 2) and (dims[0] != 'sounding'):
-                         ds_interp[variable] = ds_interp[variable].T
-        
-                # time_dt = pd.Timestamp(np.datetime64(ds_interp.isel({'sounding': 0}).launch_time.data.astype("<M8[ns]")))
-                
-                if ds_interp.ascent_flag.values[0] == 0:
-                    direction = 'AscentProfile'
-                elif ds_interp.ascent_flag.values[0] == 1:
-                    direction = 'DescentProfile'
+            
+            # direction = get_direction(ds_interp, ds)
+            most_common_vertical_movement = np.argmax(
+                [np.count_nonzero(ds_interp.ascent_rate > 0), np.count_nonzero(ds_interp.ascent_rate < 0)]
+            )
+            ds_interp['ascent_flag'] = xr.DataArray([most_common_vertical_movement], dims=['sounding'])
                     
-                # time_fmt = time_dt.strftime('%Y%m%dT%H%M')
-                outfile = args['output']+'{platform}_Radiosonde_{level}_{date_YYYYMMDDTHHMM}_{location_coord}_{direction}.nc'.format(
-                    platform=ds_interp.attrs['platform'],
-                    level='Level2',
-                    date_YYYYMMDDTHHMM=ds_interp.attrs['date_YYYYMMDDTHHMM'],
-                    location_coord=ds_interp.attrs['location_coord'],
-                    direction=direction
-                    )
-                
-                logging.info('Write output to {}'.format(outfile))
-                h.write_dataset(ds_interp, outfile)
+            # # Copy trajectory id from level1 dataset
+            # ds_interp['sounding'] = xr.DataArray([ds['sounding'].values])#, dims=['sounding'])
+            ds_interp.sounding.attrs = ds['sounding'].attrs
+            
+            # merged_conf = OmegaConf.merge(config.level2, meta_data_cfg)
+            # merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg))
+            ds_interp.attrs = ds.attrs
+            
+            ds_interp = h.replace_global_attributes(ds_interp, cfg)
+            ds_interp.attrs["source"] = str(file).split("/")[-1]
+            
+            variables = reader.variable_name_mapping_output.items()
+            ds_interp = h.set_additional_var_attributes(ds_interp, cfg.level2.variables, variables)
+            
+            # Transpose dataset if necessary
+            for variable in ds_interp.data_vars:
+                 if variable == 'alt_bnds': continue
+                 dims = ds_interp[variable].dims
+                 if (len(dims) == 2) and (dims[0] != 'sounding'):
+                     ds_interp[variable] = ds_interp[variable].T
+    
+            # time_dt = pd.Timestamp(np.datetime64(ds_interp.isel({'sounding': 0}).launch_time.data.astype("<M8[ns]")))
+            
+            if ds_interp.ascent_flag.values[0] == 0:
+                direction = 'AscentProfile'
+            elif ds_interp.ascent_flag.values[0] == 1:
+                direction = 'DescentProfile'
+              
+            # time_fmt = time_dt.strftime('%Y%m%dT%H%M')
+            outfile = args['output']+'{platform}_Radiosonde_{level}_{date_YYYYMMDDTHHMM}_{location_coord}_{direction}.nc'.format(
+                platform=ds_interp.attrs['platform'],
+                level='Level2',
+                date_YYYYMMDDTHHMM=ds_interp.attrs['date_YYYYMMDDTHHMM'],
+                location_coord=ds_interp.attrs['location_coord'],
+                direction=direction
+                )
+            
+            logging.info('Write output to {}'.format(outfile))
+            h.write_dataset(ds_interp, outfile)
                 
 if __name__ == "__main__":
     main()

@@ -193,3 +193,13 @@ variables:
         coordinates:
             - sounding
         internal_varname : "sounding"
+    level:
+        attrs:
+            cf_role: "level"
+            long_name: "level"
+            description: "Level of measurement"
+        encodings:
+            dtype: "str"
+        coordinates:
+            - level
+        internal_varname : "level"
