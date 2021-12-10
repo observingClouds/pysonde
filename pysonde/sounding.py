@@ -299,10 +299,6 @@ class Sounding:
                 except ValueError:
                     ds = ds.assign_coords({var_out: [id]})
         
-        
-        # import pdb;
-        # pdb.set_trace()
-        
         merged_conf = h.replace_placeholders_cfg(self,merged_conf)
         
         logging.debug("Add global attributes")
