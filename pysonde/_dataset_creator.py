@@ -81,10 +81,13 @@ def set_variables(cfg, ds):
     logging.debug("Add variables to dataset")
     if "variables" in cfg.keys():
         for var, params in cfg.variables.items():
-            coord_dict = {coord: ds[coord] for coord in params.coordinates}
-            ds[var] = xr.DataArray(None, coords=coord_dict, dims=params.coordinates)
-            if "attrs" in params.keys():
-                ds[var].attrs = params["attrs"]
-            if "encodings" in params.keys():
-                ds[var].encoding = params["encodings"]
+            if var=='level' or var=='sounding':
+                pass
+            else:
+                coord_dict = {  coord: ds[coord] for coord in params.coordinates}
+                ds[var] = xr.DataArray(None, coords=coord_dict, dims=params.coordinates)
+                if "attrs" in params.keys():
+                    ds[var].attrs = params["attrs"]
+                if "encodings" in params.keys():
+                    ds[var].encoding = params["encodings"]
     return ds
