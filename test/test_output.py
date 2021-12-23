@@ -3,6 +3,7 @@ Test output of level 1 converter
 """
 import glob
 import os
+import warnings
 
 import numpy as np
 import pint_xarray
@@ -59,4 +60,13 @@ def test_sounding_id():
         "examples/level1/EUREC4A_BCO_Vaisala-RS_L1-ascent_20200126T2244_v3.0.0.nc"
     )
     ds_new = xr.open_dataset(output_file_fmt.format(direction="ascent"))
-    assert ds_old.sounding == ds_new.sounding, "Sounding IDs do not agree"
+    sounding_id_old_values = ds_old.sounding.values[0].split("__")
+    sounding_id_new_values = ds_new.sounding.values[0].split("__")
+
+    for v, (ov, nv) in enumerate(zip(sounding_id_old_values, sounding_id_new_values)):
+        if v == 0 and not (ov == nv):
+            warnings.warn(f"Platforms have changes from {ov} to {nv}")
+        else:
+            assert ov == nv, print(
+                f"Parts of sounding IDs do not match (old: {ds_old.sounding}; new: {ds_new.sounding})"
+            )
