@@ -1,11 +1,18 @@
+"""
+Test output of level 1 converter
+"""
 import glob
 import os
 
 import numpy as np
+import pint_xarray
 import xarray as xr
+from metpy.units import units
 
 # Convert example level0 file with current script to level1
 from pysonde.pysonde import main
+
+pint_xarray.unit_Registry = units
 
 output_file_fmt = "pytest_output_tmp_{direction}.nc"
 output_files = glob.glob(output_file_fmt.format(direction="*"))
@@ -16,11 +23,8 @@ for file in output_files:
 main(
     args={
         "inputfile": "examples/level0/BCO_20200126_224454.mwx",
-        # "inputfile": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/examples/level0/4DC8UUK_20210709_014553.mwx",
         "config": "config/main.yaml",
-        # "config": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/config/main.yaml",
         "output": output_file_fmt,
-        # "output": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/examples/level2/RV_Sonne_Radiosonde_Level2_20210709T0145_13.8N-22.6E_AscentProfile.nc",
         "verbose": "INFO",
     }
 )
@@ -37,9 +41,14 @@ def test_file_consistency():
     ds_new = xr.open_dataset(output_file_fmt.format(direction="ascent"))
     assert "ta" in ds_old.data_vars.keys(), "ta is missing"
     for var in ds_old.data_vars.keys():
-        max_diff = np.abs(
-            ds_new.isel(sounding=0)[var] - ds_old.isel(sounding=0)[var]
-        ).max()
+        max_diff = (
+            np.abs(
+                ds_new.isel(sounding=0).reset_coords().squeeze()[var].pint.quantify()
+                - ds_old.isel(sounding=0).reset_coords().squeeze()[var].pint.quantify()
+            )
+            .max()
+            .pint.dequantify()
+        )
         assert (
             max_diff <= 0.0001
         ), f"difference between old and new dataset is too large for {var}"
