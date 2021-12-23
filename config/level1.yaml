@@ -205,7 +205,7 @@ variables:
             long_name: "level"
             description: "Level of measurement"
         encodings:
-            dtype: "str"
+            dtype: "int16"
         coordinates:
             - level
         internal_varname : "level"

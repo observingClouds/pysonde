@@ -147,7 +147,7 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
                 ds_interp[var_out] = ds_interp[var_out].pint.to(cfg.level2.variables[var_in].attrs.units)
             except:
                 pass
-            
+    
     return ds_interp
 
 
@@ -235,6 +235,18 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
             try:
                 # ds_interp[var_out] = ds_interp[var_out].pint.quantify(ds_new[var_out].data.units)
                 ds_interp[var_out] = ds_interp[var_out].pint.to(cfg.level2.variables[var_in].attrs.units)
+            except:
+                pass
+        
+        for var_in, var_out in variables:
+            try:
+                if not ds_interp[var_out].dtype == cfg.level2.variables[var_in].encodings.dtype:
+                    ds_interp[var_out] = ds_interp[var_out].astype(cfg.level2.variables[var_in].encodings.dtype)
+            except:
+                pass
+                
+            try:
+                ds_interp[var_out].encoding = cfg.level2.variables[var_in].encodings
             except:
                 pass
             
