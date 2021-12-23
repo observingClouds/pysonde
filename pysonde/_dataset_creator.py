@@ -82,7 +82,8 @@ def set_variables(cfg, ds):
     if "variables" in cfg.keys():
         for var, params in cfg.variables.items():
             if var=='level' or var=='sounding':
-                pass
+                if "encodings" in params.keys():
+                    ds[var].encoding = params["encodings"]
             else:
                 coord_dict = {  coord: ds[coord] for coord in params.coordinates}
                 ds[var] = xr.DataArray(None, coords=coord_dict, dims=params.coordinates)
