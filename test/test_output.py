@@ -16,11 +16,11 @@ for file in output_files:
 main(
     args={
         "inputfile": "examples/level0/BCO_20200126_224454.mwx",
-        #"inputfile": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/examples/level0/4DC8UUK_20210709_014553.mwx",
-        "config": "../config/main.yaml",
-        #"config": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/config/main.yaml",
+        # "inputfile": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/examples/level0/4DC8UUK_20210709_014553.mwx",
+        "config": "config/main.yaml",
+        # "config": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/config/main.yaml",
         "output": output_file_fmt,
-        #"output": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/examples/level2/RV_Sonne_Radiosonde_Level2_20210709T0145_13.8N-22.6E_AscentProfile.nc",
+        # "output": "/home/katharina/Dokumente/Studium/UniHamburg/MPI/pysonde/examples/level2/RV_Sonne_Radiosonde_Level2_20210709T0145_13.8N-22.6E_AscentProfile.nc",
         "verbose": "INFO",
     }
 )
