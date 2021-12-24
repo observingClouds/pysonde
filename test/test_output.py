@@ -15,18 +15,30 @@ from pysonde.pysonde import main
 
 pint_xarray.unit_Registry = units
 
-output_file_fmt = "pytest_output_tmp_{direction}.nc"
-output_files = glob.glob(output_file_fmt.format(direction="*"))
+l1_output_file_fmt = "pytest_l1-output_tmp_{direction}.nc"
+l1_output_files = glob.glob(l1_output_file_fmt.format(direction="*"))
 
-for file in output_files:
+for file in l1_output_files:
     os.remove(file)
 
 main(
     args={
         "inputfile": "examples/level0/BCO_20200126_224454.mwx",
         "config": "config/main.yaml",
-        "output": output_file_fmt,
+        "output": l1_output_file_fmt,
         "verbose": "INFO",
+    }
+)
+
+l2_output_file_fmt = "pytest_l2-output_tmp_{direction}.nc"
+
+main(
+    args={
+        "inputfile": "./../pysonde/" + l1_output_file_fmt.format(direction="ascent"),
+        "config": "config/main.yaml",
+        "output": l2_output_file_fmt,
+        "verbose": "INFO",
+        "method": "bin",
     }
 )
 
@@ -39,7 +51,7 @@ def test_file_consistency():
     ds_old = xr.open_dataset(
         "examples/level1/EUREC4A_BCO_Vaisala-RS_L1-ascent_20200126T2244_v3.0.0.nc"
     )
-    ds_new = xr.open_dataset(output_file_fmt.format(direction="ascent"))
+    ds_new = xr.open_dataset(l1_output_file_fmt.format(direction="ascent"))
     assert "ta" in ds_old.data_vars.keys(), "ta is missing"
     for var in ds_old.data_vars.keys():
         max_diff = (
@@ -59,7 +71,7 @@ def test_sounding_id():
     ds_old = xr.open_dataset(
         "examples/level1/EUREC4A_BCO_Vaisala-RS_L1-ascent_20200126T2244_v3.0.0.nc"
     )
-    ds_new = xr.open_dataset(output_file_fmt.format(direction="ascent"))
+    ds_new = xr.open_dataset(l1_output_file_fmt.format(direction="ascent"))
     sounding_id_old_values = ds_old.sounding.values[0].split("__")
     sounding_id_new_values = ds_new.sounding.values[0].split("__")
 
