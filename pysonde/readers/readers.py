@@ -145,11 +145,16 @@ class pysondeL1:
         ureg.force_ndarray_like = True
         # ureg.define("fraction = [] = frac")
         # ureg.define("percent = 1e-2 frac = pct")
+        # ureg.define("1 = pct")
         # ureg.define("degrees_east = degree")
         # ureg.define("degrees_north = degree")
         pint_xarray.unit_Registry = ureg
 
         ds = xr.open_dataset(L1_file)
+        
+        if ds.rh.attrs['units'] == '1':
+            ds.rh.attrs['units'] = 'dimensionless'
+
         ds = ds.pint.quantify(
             unit_registry=ureg
         )  # Apply units to dataset (requires currently pip install git+https://github.com/xarray-contrib/pint-xarray@7518c844a034361c1f8921d74bc5f9a96fec1910 --ignore-requires-python

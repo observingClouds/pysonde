@@ -30,8 +30,12 @@ def convert_rh_to_dewpoint(temperature, rh):
         temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
+    else:
+        temperature_K = temperature.data.magnitude
     if isinstance(rh, pp.pint_array.PintArray):
         rh = rh.quantity.to("percent").magnitude
+    else:
+        rh = rh.data.magnitude
     assert np.any(temperature_K > 100), "Temperature seems to be not given in Kelvin"
     kelvin = 15 * np.log(100 / rh) - 2 * (temperature_K - 273.15) + 2711.5
     t_dew = temperature_K * 2 * kelvin / (temperature_K * np.log(100 / rh) + 2 * kelvin)
