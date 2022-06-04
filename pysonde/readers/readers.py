@@ -11,8 +11,8 @@ import pandas as pd  # noqa: F401
 import pint
 import pint_pandas as pp
 import pint_xarray  # noqa: F401
-from metpy.units import units
 import xarray as xr
+from metpy.units import units
 
 sys.path.append(os.path.dirname(__file__))
 import reader_helpers as rh  # noqa: E402
@@ -31,6 +31,7 @@ class MW41:
         # Configure, which values need to be read and how they are named
         self.sync_sounding_values = cfg.level0.sync_sounding_items
         self.radiosondes_values = cfg.level0.radiosondes_sounding_items
+        # self.radiosondes_values = cfg.level0.radiosondes_sounding_items
         self.variable_name_mapping = cfg.level0.dictionary_input
         self.units = cfg.level0.input_units
 
@@ -121,11 +122,16 @@ class pysondeL1:
     """
     Reader for level 1 data created with pysonde
     """
+
     def __init__(self, cfg):
         """Configure reader"""
         # Configure, which values need to be read and how they are named
-        self.variable_name_mapping_input = self._get_variable_name_mapping(cfg["level1"])
-        self.variable_name_mapping_output = self._get_variable_name_mapping(cfg["level2"])
+        self.variable_name_mapping_input = self._get_variable_name_mapping(
+            cfg["level1"]
+        )
+        self.variable_name_mapping_output = self._get_variable_name_mapping(
+            cfg["level2"]
+        )
 
     def _get_variable_name_mapping(self, cfg_lev):
         variables = cfg_lev["variables"]
@@ -141,7 +147,7 @@ class pysondeL1:
 
     def read(self, L1_file):
         """Read level 1 file"""
-        ureg = units  #pint.UnitRegistry()
+        ureg = units  # pint.UnitRegistry()
         ureg.force_ndarray_like = True
         # ureg.define("fraction = [] = frac")
         # ureg.define("percent = 1e-2 frac = pct")
@@ -151,9 +157,9 @@ class pysondeL1:
         pint_xarray.unit_Registry = ureg
 
         ds = xr.open_dataset(L1_file)
-        
-        if ds.rh.attrs['units'] == '1':
-            ds.rh.attrs['units'] = 'dimensionless'
+
+        if ds.rh.attrs["units"] == "1":
+            ds.rh.attrs["units"] = "dimensionless"
 
         ds = ds.pint.quantify(
             unit_registry=ureg

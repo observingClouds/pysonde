@@ -136,19 +136,19 @@ class Sounding:
 
     def generate_location_coord(self):
         """Generate unique id of sounding"""
-        lat=self.profile.latitude.values[0]
+        lat = self.profile.latitude.values[0]
         if lat > 0:
-            lat="{:04.1f}".format(lat)
+            lat = "{:04.1f}".format(lat)
         else:
-            lat="{:05.1f}".format(lat)
-            
-        lon=self.profile.longitude.values[0]
+            lat = "{:05.1f}".format(lat)
+
+        lon = self.profile.longitude.values[0]
         if lon > 0:
-            lon="{:04.1f}".format(lon)
+            lon = "{:04.1f}".format(lon)
         else:
-            lon="{:05.1f}".format(lon)
-            
-        loc = str(lat)+"N"+str(lon)+"E"
+            lon = "{:05.1f}".format(lon)
+
+        loc = str(lat) + "N" + str(lon) + "E"
         self.meta_data["location_coord"] = loc
 
     def generate_sounding_id(self, config):
@@ -213,19 +213,19 @@ class Sounding:
         meta_data_cfg = OmegaConf.create(
             {"meta_level0": h.remove_nontype_keys(self.meta_data, type("str"))}
         )
-        
+
         # meta_data_cfg = OmegaConf.create({"meta_level0": self.meta_data})
         merged_conf = OmegaConf.merge(config.level1, meta_data_cfg, runtime_cfg)
         merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg, runtime_cfg))
         ds = dc.create_dataset(merged_conf)
-        
+
         ds.flight_time.data = xr.DataArray(
             [self.profile.flight_time], dims=["sounding", "level"]
         )
 
         # Fill dataset with data
         unset_vars = {}
-        
+
         for k in {**ds.coords, **ds.data_vars}.keys():
             try:
                 isquantity = (
@@ -298,14 +298,14 @@ class Sounding:
                     ds[var_out].data = [id]
                 except ValueError:
                     ds = ds.assign_coords({var_out: [id]})
-        
-        merged_conf = h.replace_placeholders_cfg(self,merged_conf)
-        
+
+        merged_conf = h.replace_placeholders_cfg(self, merged_conf)
+
         logging.debug("Add global attributes")
         if "global_attrs" in merged_conf.keys():
             _cfg = h.remove_missing_cfg(merged_conf["global_attrs"])
             ds.attrs = _cfg
-        
+
         self.dataset = ds
 
     def export(self, output_fmt, cfg):

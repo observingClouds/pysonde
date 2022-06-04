@@ -8,6 +8,15 @@ global_attrs:
 #    source: "{input_file}"
     version: "{version}"
     history: "created with {package} ({version}) on {date}"
+#    description: ???
+#    campaign_id: ${main.campaign_id}
+#    platform: ${main.platform}
+#    instrument: "Radiosonde RS41-SGP by Vaisala"
+#    doi: ???
+#    featureType: "trajectory"
+#    acknowledgement: ???
+#    references: ???
+#    Conventions: "CF-1.7"
 
 coordinates:
     sounding:
@@ -299,7 +308,7 @@ variables:
         attrs:
             standard_name: "number_of_observations"
             description: "number of observations used to derive level 2 PTU-data average"
-            units: "percent"
+            units: "1"
             coordinates: "lon lat flight_time launch_time"
         encodings:
             dtype: "float32"

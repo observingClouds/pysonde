@@ -47,7 +47,7 @@ def create_dataset(cfg):
     cfg : OmegaConf
         Config containing dataset template
     """
-    
+
     ds = xr.Dataset()
     # ds = set_global_attrs(cfg, ds)
     ds = set_coords(cfg, ds)
@@ -81,11 +81,11 @@ def set_variables(cfg, ds):
     logging.debug("Add variables to dataset")
     if "variables" in cfg.keys():
         for var, params in cfg.variables.items():
-            if var=='level' or var=='sounding':
+            if var == "level" or var == "sounding":
                 if "encodings" in params.keys():
                     ds[var].encoding = params["encodings"]
             else:
-                coord_dict = {  coord: ds[coord] for coord in params.coordinates}
+                coord_dict = {coord: ds[coord] for coord in params.coordinates}
                 ds[var] = xr.DataArray(None, coords=coord_dict, dims=params.coordinates)
                 if "attrs" in params.keys():
                     ds[var].attrs = params["attrs"]

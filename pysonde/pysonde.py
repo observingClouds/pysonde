@@ -10,20 +10,12 @@ import logging
 import sys
 
 import numpy as np
-import xarray as xr
 import tqdm
-import pyproj
 from omegaconf import OmegaConf
-import metpy.calc as mpcalc
-import os
-import time
-from metpy.units import units
 
 from . import _helpers as h
-from . import readers
-from . import meteorology_helpers as mh
-from . import thermodynamics as td
 from . import _proc_level2 as p2
+from . import readers
 
 
 def get_args():
@@ -68,10 +60,14 @@ def get_args():
         type=h.unixpath,
     )
 
-    parser.add_argument('-m', '--method', metavar='METHOD',
-                        help="Interpolation method ('bin' (default), 'linear')",
-                        default='bin',
-                        required=False)
+    parser.add_argument(
+        "-m",
+        "--method",
+        metavar="METHOD",
+        help="Interpolation method ('bin' (default), 'linear')",
+        default="bin",
+        required=False,
+    )
 
     parser.add_argument(
         "-v",
@@ -127,8 +123,6 @@ def main(args=None):
     main_cfg = OmegaConf.load(args["config"])
     cfg = h.combine_configs(main_cfg.configs)
 
-    # cfg = h.replace_placeholders_cfg(cfg)
-
     input_files = h.find_files(args["inputfile"])
     logging.info("Files to process {}".format([file.name for file in input_files]))
 
@@ -140,7 +134,7 @@ def main(args=None):
 
     for ifile, file in enumerate(tqdm.tqdm(input_files)):
         logging.debug("Reading file number {}".format(ifile))
-        
+
         sounding = reader.read(file)
 
         if isinstance(reader, readers.readers.MW41):
@@ -160,17 +154,17 @@ def main(args=None):
                 snd.create_dataset(cfg)
                 snd.export(args["output"], cfg)
         elif isinstance(reader, readers.readers.pysondeL1):
-            
+
             cfg = h.replace_placeholders_cfg_level2(cfg)
-            
+
             if len(sounding.profile.sounding) != 1:
                 raise NotImplementedError(
                     "Level 1 files with more than one sounding are currently not supported"
                 )
-            
+
             ds = sounding.profile.isel({"sounding": 0})
             ds_input = ds.copy()
-            
+
             # Check monotonic ascent/descent
             if np.all(np.diff(ds.isel(level=slice(20, -1)).alt.values) > 0) or np.all(
                 np.diff(ds.isel(level=slice(20, -1)).alt.values) < 0
@@ -187,7 +181,7 @@ def main(args=None):
             # here the first occurrence is used
             _, uniq_altitude_idx = np.unique(ds.alt.values, return_index=True)
             ds = ds.isel({"level": uniq_altitude_idx})
-            
+
             # Consistent platform test
             if ifile == 0:
                 platform = ds.platform
@@ -202,32 +196,49 @@ def main(args=None):
             if len(ds.alt) != len(np.unique(ds.alt)):
                 logging.error("Altitude levels are not unique of {}".format(file))
                 break
-            
+
             # Prepare some data that cannot be linearly interpolated
-            ds, ds_new = p2.prepare_data_for_interpolation(ds, sounding.unitregistry,
-                                                                   reader.variable_name_mapping_output.items())
-                    
+            ds, ds_new = p2.prepare_data_for_interpolation(
+                ds, sounding.unitregistry, reader.variable_name_mapping_output.items()
+            )
+
             # Interpolation
-            interpolation_grid = np.arange(cfg.level2.setup.interpolation_grid_min,
-                                           cfg.level2.setup.interpolation_grid_max,
-                                           cfg.level2.setup.interpolation_grid_inc)
-            ds_interp = p2.interpolation(ds_new, args['method'], interpolation_grid, sounding,
-                                        reader.variable_name_mapping_output.items(), cfg)
-            
-            ds_interp = p2.adjust_ds_after_interpolation(ds_interp, ds, ds_input,
-                                             reader.variable_name_mapping_output.items(), cfg)
-            
-            if args['method'] == 'bin':
-                ds_interp = p2.count_number_of_measurement_within_bin(ds_interp, ds_new, cfg,
-                                                                      interpolation_grid)
-            
-            ds_interp = p2.finalize_attrs(ds_interp, ds, cfg, file, reader.variable_name_mapping_output.items())
-            
-            p2.export(args['output'], ds_interp)
-            
+            interpolation_grid = np.arange(
+                cfg.level2.setup.interpolation_grid_min,
+                cfg.level2.setup.interpolation_grid_max,
+                cfg.level2.setup.interpolation_grid_inc,
+            )
+            ds_interp = p2.interpolation(
+                ds_new,
+                args["method"],
+                interpolation_grid,
+                sounding,
+                reader.variable_name_mapping_output.items(),
+                cfg,
+            )
+
+            ds_interp = p2.adjust_ds_after_interpolation(
+                ds_interp,
+                ds,
+                ds_input,
+                reader.variable_name_mapping_output.items(),
+                cfg,
+            )
+
+            if args["method"] == "bin":
+                ds_interp = p2.count_number_of_measurement_within_bin(
+                    ds_interp, ds_new, cfg, interpolation_grid
+                )
+
+            ds_interp = p2.finalize_attrs(
+                ds_interp, ds, cfg, file, reader.variable_name_mapping_output.items()
+            )
+
+            p2.export(args["output"], ds_interp)
+
             # import pdb;
             # pdb.set_trace()
-            
-                
+
+
 if __name__ == "__main__":
     main()

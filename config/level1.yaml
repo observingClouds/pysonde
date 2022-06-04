@@ -20,7 +20,6 @@ global_attrs:
     history: "created with {package} ({version}) on {date}"
     featureType: "trajectory"
     Conventions: "CF-1.7"
-
 coordinates:
     sounding:
         dimension: ${runtime.sounding_dim}

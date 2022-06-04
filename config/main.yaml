@@ -1,7 +1,7 @@
-campaign: SO284
-campaign_id: SO284
-platform: RV_Sonne
-location: RV_Sonne
+campaign: EUREC4A
+campaign_id: EUREC4A
+platform: BCO
+location: Deebles Point
 configs:
     main: config/main.yaml  # name of this file
     level0: config/level0_mwx.yml
