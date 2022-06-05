@@ -1,4 +1,5 @@
 black
+bottleneck
 coverage==5.3.1
 dask
 flake8
