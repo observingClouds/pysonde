@@ -39,10 +39,10 @@ class MW41:
         def _get_flighttime(radio_time, start_time, launch_time):
             """
             f_flighttime = lambda radio_time: start_time + dt.timedelta(
-                seconds=radio_time - np.float(launch_time)
+                seconds=radio_time - float(launch_time)
             )
             """
-            return start_time + dt.timedelta(seconds=radio_time - np.float(launch_time))
+            return start_time + dt.timedelta(seconds=radio_time - float(launch_time))
 
         with rh.MWX(mwx_file) as mwx:
             decompressed_files = mwx.decompressed_files

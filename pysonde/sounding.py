@@ -129,7 +129,7 @@ class Sounding:
         time_differences = np.abs(
             np.diff(np.ma.compressed(self.profile.flight_time))
         ) / np.timedelta64(1, "s")
-        time_differences_counts = np.bincount(time_differences.astype(np.int))
+        time_differences_counts = np.bincount(time_differences.astype(int))
         most_common_diff = np.argmax(time_differences_counts)
         temporal_resolution = most_common_diff
         self.meta_data["temporal_resolution"] = temporal_resolution
