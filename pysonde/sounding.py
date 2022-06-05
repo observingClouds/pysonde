@@ -129,10 +129,27 @@ class Sounding:
         time_differences = np.abs(
             np.diff(np.ma.compressed(self.profile.flight_time))
         ) / np.timedelta64(1, "s")
-        time_differences_counts = np.bincount(time_differences.astype(np.int))
+        time_differences_counts = np.bincount(time_differences.astype(int))
         most_common_diff = np.argmax(time_differences_counts)
         temporal_resolution = most_common_diff
         self.meta_data["temporal_resolution"] = temporal_resolution
+
+    def generate_location_coord(self):
+        """Generate unique id of sounding"""
+        lat = self.profile.latitude.values[0]
+        if lat > 0:
+            lat = "{:04.1f}".format(lat)
+        else:
+            lat = "{:05.1f}".format(lat)
+
+        lon = self.profile.longitude.values[0]
+        if lon > 0:
+            lon = "{:04.1f}".format(lon)
+        else:
+            lon = "{:05.1f}".format(lon)
+
+        loc = str(lat) + "N" + str(lon) + "E"
+        self.meta_data["location_coord"] = loc
 
     def generate_sounding_id(self, config):
         """Generate unique id of sounding"""
@@ -181,6 +198,8 @@ class Sounding:
         self.meta_data["launch_time_dt"] = self.profile.flight_time.iloc[0]
         # Resolution
         self.calc_temporal_resolution()
+        # Location
+        self.generate_location_coord()
         # Sounding ID
         self.generate_sounding_id(config)
         self.get_sonde_type()
@@ -194,6 +213,7 @@ class Sounding:
         meta_data_cfg = OmegaConf.create(
             {"meta_level0": h.remove_nontype_keys(self.meta_data, type("str"))}
         )
+
         # meta_data_cfg = OmegaConf.create({"meta_level0": self.meta_data})
         merged_conf = OmegaConf.merge(config.level1, meta_data_cfg, runtime_cfg)
         merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg, runtime_cfg))
@@ -205,6 +225,7 @@ class Sounding:
 
         # Fill dataset with data
         unset_vars = {}
+
         for k in {**ds.coords, **ds.data_vars}.keys():
             try:
                 isquantity = (

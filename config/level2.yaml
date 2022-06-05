@@ -5,17 +5,18 @@ setup:
     max_gap_fill: 50
 global_attrs:
     title: ${main.campaign} level 2 sounding data
-    description: ???
-    campaign_id: ${main.campaign_id}
-    platform: ${main.platform}
-    instrument: "Radiosonde RS41-SGP by Vaisala"
-    doi: ???
-    version: ???
+#    source: "{input_file}"
+    version: "{version}"
     history: "created with {package} ({version}) on {date}"
-    featureType: "trajectory"
-    acknowledgement: ???
-    references: ???
-    Conventions: "CF-1.7"
+#    description: ???
+#    campaign_id: ${main.campaign_id}
+#    platform: ${main.platform}
+#    instrument: "Radiosonde RS41-SGP by Vaisala"
+#    doi: ???
+#    featureType: "trajectory"
+#    acknowledgement: ???
+#    references: ???
+#    Conventions: "CF-1.7"
 
 coordinates:
     sounding:
@@ -49,6 +50,7 @@ variables:
         coordinates:
             - alt
             - nv
+        internal_varname: "alt_bnds"
     launch_time:
         attrs:
             standard_name: "time"
@@ -65,7 +67,7 @@ variables:
             long_name: "platform identifier"
             coordinates: "launch_time"
             flag_meanings: "BCO Meteor"
-            flag_values: [1, 2]
+            flag_values: "[1, 2]"
             units: "1"
         encodings:
             dtype: "int8"
@@ -76,8 +78,8 @@ variables:
         attrs:
             long_name: "indicator of vertical flight direction"
             flag_meanings: "ascending descending"
-            flag_values: [1,0]
-            valid_range: [ 0,1 ]
+            flag_values: "[1,0]"
+            valid_range: "[ 0,1 ]"
             coordinates: "launch_time"
         encodings:
             dtype: "int8"
@@ -192,7 +194,7 @@ variables:
         coordinates:
             - sounding
             - alt
-        internal_varname: "dew_point"
+        internal_varname: "dewpoint"
     wspd:
         attrs:
             standard_name: "wind_speed"
@@ -219,7 +221,7 @@ variables:
         coordinates:
             - sounding
             - alt
-        invernal_varname: "wind_u"
+        internal_varname: "wind_u"
     v:
         attrs:
             standard_name: "northward_wind"
@@ -233,7 +235,7 @@ variables:
         coordinates:
             - sounding
             - alt
-        invernal_varname: "wind_v"
+        internal_varname: "wind_v"
     mr:
         attrs:
             standard_name: "humidity_mixing_ratio"
@@ -301,7 +303,7 @@ variables:
         coordinates:
             - sounding
             - alt
-        internal_varname : "humidity"
+        internal_varname : "relative_humidity"
     N_ptu:
         attrs:
             standard_name: "number_of_observations"
@@ -331,7 +333,7 @@ variables:
             long_name: "bin method"
             description: "method used to derive level 2 PTU-data average"
             flag_meanings: "no_data interpolation averaging"
-            flag_values: [ 0, 1, 2 ]
+            flag_values: "[ 0, 1, 2 ]"
             coordinates: "lon lat flight_time launch_time"
         encodings:
             dtype: "int8"
@@ -344,7 +346,7 @@ variables:
             long_name: "bin method"
             description: "method used to derive level 2 GPS-data average"
             flag_meanings: "no_data interpolation averaging"
-            flag_values: [ 0, 1, 2 ]
+            flag_values: "[ 0, 1, 2 ]"
             coordinates: "lon lat flight_time launch_time"
         encodings:
             dtype: "int8"

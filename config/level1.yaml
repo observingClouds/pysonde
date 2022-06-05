@@ -2,12 +2,14 @@ global_attrs:
     title: ${main.campaign} level 1 sounding data
     description: ???
     location: ${main.location}
+    location_coord: "{location_coordinates}"
     campaign_id: ${main.campaign_id}
     platform: ${main.platform}
     instrument: "Radiosonde RS41-SGP by Vaisala"
     instrument_id: "Vaisala-RS"
     time_of_launch_HHmmss: "{time_launch}"
     date_YYYYMMDD: "{day_launch}"
+    date_YYYYMMDDTHHMM: "{date_launch}"
     resolution: "{resolution}"
     number_of_probe: ${meta_level0.number_of_probe}
     sonde_type: ${meta_level0.sonde_type}
@@ -141,7 +143,7 @@ variables:
         attrs:
             standard_name: "wind_speed"
             long_name: "wind speed"
-            units: "m/s"
+            units: "knots"
             coordinates: "launch_time flight_time lon lat p"
         encodings:
             dtype: "float32"
@@ -196,3 +198,13 @@ variables:
         coordinates:
             - sounding
         internal_varname : "sounding"
+    level:
+        attrs:
+            cf_role: "level"
+            long_name: "level"
+            description: "Level of measurement"
+        encodings:
+            dtype: "int16"
+        coordinates:
+            - level
+        internal_varname : "level"

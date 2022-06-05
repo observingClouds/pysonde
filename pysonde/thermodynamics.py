@@ -1,8 +1,11 @@
 """
 Thermodynamic functions
 """
+import metpy
+import metpy.calc as mpcalc
 import numpy as np
 import pint_pandas as pp
+import xarray as xr
 
 # ureg = pint.UnitRegistry()
 # ureg.define("fraction = [] = frac")
@@ -26,8 +29,12 @@ def convert_rh_to_dewpoint(temperature, rh):
         temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
+    else:
+        temperature_K = temperature.data.magnitude
     if isinstance(rh, pp.pint_array.PintArray):
         rh = rh.quantity.to("percent").magnitude
+    else:
+        rh = rh.data.magnitude
     assert np.any(temperature_K > 100), "Temperature seems to be not given in Kelvin"
     kelvin = 15 * np.log(100 / rh) - 2 * (temperature_K - 273.15) + 2711.5
     t_dew = temperature_K * 2 * kelvin / (temperature_K * np.log(100 / rh) + 2 * kelvin)
@@ -68,13 +75,17 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
         temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
+    elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(
+        temperature.data, "_units"
+    ):
+        temperature_K = temperature.pint.to("K").metpy.magnitude
     else:
         temperature_K = temperature
     if method == "hardy1998":
         g = np.empty(8)
-        g[0] = -2.8365744 * 10 ** 3
-        g[1] = -6.028076559 * 10 ** 3
-        g[2] = 1.954263612 * 10 ** 1
+        g[0] = -2.8365744 * 10**3
+        g[1] = -6.028076559 * 10**3
+        g[2] = 1.954263612 * 10**1
         g[3] = -2.737830188 * 10 ** (-2)
         g[4] = 1.6261698 * 10 ** (-5)
         g[5] = 7.0229056 * 10 ** (-10)
@@ -90,6 +101,12 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
             e_sw[t] = np.exp(ln_e_sw)
         if isinstance(temperature, pp.pint_array.PintArray):
             e_sw = pp.PintArray(e_sw, dtype="Pa")
+        elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(
+            temperature.data, "_units"
+        ):
+            e_sw = xr.DataArray(
+                e_sw, dims=temperature.dims, coords=temperature.coords
+            ) * metpy.units.units("Pa")
         return e_sw
 
 
@@ -113,3 +130,42 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
         return wv_mix_ratio * ureg("g") / ureg("kg")
     else:
         return wv_mix_ratio
+
+
+def calc_theta_from_T(T, p):
+    """
+    Input :
+        T : temperature
+        p : pressure
+    Output :
+        theta : Potential temperature values
+    Function to estimate potential temperature from the
+    temperature and pressure in the given dataset. This function uses MetPy's
+    functions to get theta:
+    (i) mpcalc.potential_temperature()
+
+    """
+    theta = mpcalc.potential_temperature(p.metpy.quantify(), T.metpy.quantify())
+
+    return theta
+
+
+def calc_T_from_theta(theta, p):
+    """
+    Input :
+        theta : potential temperature (K)
+        p : pressure (hPa)
+    Output :
+        T : Temperature values
+    Function to estimate temperature from potential temperature and pressure,
+    in the given dataset. This function uses MetPy's
+    functions to get T:
+    (i) mpcalc.temperature_from_potential_temperature()
+
+    """
+    T = mpcalc.temperature_from_potential_temperature(
+        p,
+        theta,
+    )
+
+    return T
