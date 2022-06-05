@@ -120,7 +120,7 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
         for var_in, var_out in variables:
             try:
                 ds_interp[var_out] = ds_interp[var_out].pint.quantify(
-                    ds_new[var_out].data.units
+                    ds_new[var_out].pint.units
                 )
                 ds_interp[var_out] = ds_interp[var_out].pint.to(
                     cfg.level2.variables[var_in].attrs.units
@@ -162,7 +162,7 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
         for var_in, var_out in variables:
             try:
                 ds_interp[var_out] = ds_interp[var_out].pint.quantify(
-                    ds_new[var_out].data.units
+                    ds_new[var_out].pint.units
                 )
                 ds_interp[var_out] = ds_interp[var_out].pint.to(
                     cfg.level2.variables[var_in].attrs.units
@@ -275,7 +275,7 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
 
     for var_in, var_out in variables:
         try:
-            # ds_interp[var_out] = ds_interp[var_out].pint.quantify(ds_new[var_out].data.units)
+            # ds_interp[var_out] = ds_interp[var_out].pint.quantify(ds_new[var_out].pint.units)
             ds_interp[var_out] = ds_interp[var_out].pint.to(
                 cfg.level2.variables[var_in].attrs.units
             )
