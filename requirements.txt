@@ -5,6 +5,7 @@ dask
 flake8
 isort
 metpy
+mypy
 netCDF4
 numpy
 omegaconf
