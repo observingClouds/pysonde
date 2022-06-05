@@ -191,6 +191,8 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
     )
 
     if "altitude_WGS84" in ds.keys():
+        ecef = pyproj.Proj(proj="geocent", ellps="WGS84", datum="WGS84")
+        lla = pyproj.Proj(proj="latlong", ellps="WGS84", datum="WGS84")
         lon, lat, alt = pyproj.transform(
             ecef,
             lla,
