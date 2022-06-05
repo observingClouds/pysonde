@@ -5,6 +5,7 @@ import numpy as np
 import pyproj
 import xarray as xr
 from metpy.units import units
+from omegaconf.errors import ConfigAttributeError
 
 from . import _helpers as h
 from . import meteorology_helpers as mh
@@ -125,7 +126,10 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
                 ds_interp[var_out] = ds_interp[var_out].pint.to(
                     cfg.level2.variables[var_in].attrs.units
                 )
-            except KeyError:
+            except (KeyError, ValueError, ConfigAttributeError) as e:
+                logging.warning(
+                    f"Likely no unit has been found for {var_out}, raising {e}"
+                )
                 pass
 
     elif method == "bin":
@@ -167,7 +171,10 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
                 ds_interp[var_out] = ds_interp[var_out].pint.to(
                     cfg.level2.variables[var_in].attrs.units
                 )
-            except KeyError:
+            except (KeyError, ValueError, ConfigAttributeError) as e:
+                logging.warning(
+                    f"Likely no unit has been found for {var_in}, raising {e}"
+                )
                 pass
 
     return ds_interp
@@ -279,7 +286,7 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
             ds_interp[var_out] = ds_interp[var_out].pint.to(
                 cfg.level2.variables[var_in].attrs.units
             )
-        except KeyError:
+        except (ValueError, KeyError, ConfigAttributeError):
             pass
 
     for var_in, var_out in variables:
