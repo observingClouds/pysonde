@@ -125,7 +125,7 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
                 ds_interp[var_out] = ds_interp[var_out].pint.to(
                     cfg.level2.variables[var_in].attrs.units
                 )
-            except:
+            except KeyError:
                 pass
 
     elif method == "bin":
@@ -167,7 +167,7 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
                 ds_interp[var_out] = ds_interp[var_out].pint.to(
                     cfg.level2.variables[var_in].attrs.units
                 )
-            except:
+            except KeyError:
                 pass
 
     return ds_interp
@@ -279,7 +279,7 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
             ds_interp[var_out] = ds_interp[var_out].pint.to(
                 cfg.level2.variables[var_in].attrs.units
             )
-        except:
+        except KeyError:
             pass
 
     for var_in, var_out in variables:
@@ -291,12 +291,12 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
                 ds_interp[var_out] = ds_interp[var_out].astype(
                     cfg.level2.variables[var_in].encodings.dtype
                 )
-        except:
+        except KeyError:
             pass
 
         try:
             ds_interp[var_out].encoding = cfg.level2.variables[var_in].encodings
-        except:
+        except KeyError:
             pass
 
     # for variable in ['mixing_ratio', 'theta',
