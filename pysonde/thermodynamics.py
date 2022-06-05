@@ -1,9 +1,9 @@
 """
 Thermodynamic functions
 """
-import numpy as np
 import metpy
 import metpy.calc as mpcalc
+import numpy as np
 import pint
 import pint_pandas as pp
 import xarray as xr
@@ -76,15 +76,17 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
         temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
-    elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(temperature.data, "_units"):
+    elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(
+        temperature.data, "_units"
+    ):
         temperature_K = temperature.pint.to("K").metpy.magnitude
     else:
         temperature_K = temperature
     if method == "hardy1998":
         g = np.empty(8)
-        g[0] = -2.8365744 * 10 ** 3
-        g[1] = -6.028076559 * 10 ** 3
-        g[2] = 1.954263612 * 10 ** 1
+        g[0] = -2.8365744 * 10**3
+        g[1] = -6.028076559 * 10**3
+        g[2] = 1.954263612 * 10**1
         g[3] = -2.737830188 * 10 ** (-2)
         g[4] = 1.6261698 * 10 ** (-5)
         g[5] = 7.0229056 * 10 ** (-10)
@@ -100,8 +102,12 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
             e_sw[t] = np.exp(ln_e_sw)
         if isinstance(temperature, pp.pint_array.PintArray):
             e_sw = pp.PintArray(e_sw, dtype="Pa")
-        elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(temperature.data, "_units"):
-            e_sw = xr.DataArray(e_sw, dims=temperature.dims, coords=temperature.coords) * metpy.units.units("Pa")
+        elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(
+            temperature.data, "_units"
+        ):
+            e_sw = xr.DataArray(
+                e_sw, dims=temperature.dims, coords=temperature.coords
+            ) * metpy.units.units("Pa")
         return e_sw
 
 
@@ -158,10 +164,9 @@ def calc_T_from_theta(theta, p):
     (i) mpcalc.temperature_from_potential_temperature()
 
     """
-    T = (
-        mpcalc.temperature_from_potential_temperature(
-            p, theta,
-        )
+    T = mpcalc.temperature_from_potential_temperature(
+        p,
+        theta,
     )
 
     return T
