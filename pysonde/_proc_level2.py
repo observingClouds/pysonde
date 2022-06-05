@@ -102,7 +102,6 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
 
         # Logarithmic Pressure Interpolation
         # """
-        dims_2d = ["sounding", "alt"]
         dims_1d = ["alt"]
         coords_1d = {"alt": ds_interp.alt.data}
 
@@ -320,7 +319,6 @@ def count_number_of_measurement_within_bin(ds_interp, ds_new, cfg, interpolation
 
     # Count number of measurements within each bin
     dims_2d = ["sounding", "alt"]
-    dims_1d = ["alt"]
     coords_1d = {"alt": ds_interp.alt.data}
 
     ds_interp["N_ptu"] = xr.DataArray(
