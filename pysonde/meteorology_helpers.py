@@ -243,7 +243,7 @@ def set_additional_var_attributes(ds, meta_data_dict):
                 ds[var].attrs[key] = value
             elif (key not in ["_FillValue", "dtype", "units"]) and ("time" in var):
                 ds[var].attrs[key] = value
-            elif (key == "_FillValue") and (value == False):
+            elif (key == "_FillValue") and (value is False):
                 ds[var].attrs[key] = value
             else:
                 ds[var].encoding[key] = value
@@ -257,7 +257,6 @@ def write_dataset(ds, filename):
 
 
 def get_direction(ds_interp, ds):
-    direction = None
     # First source of direction
     direction_msg = None
     try:

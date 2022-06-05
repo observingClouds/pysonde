@@ -4,7 +4,6 @@ Thermodynamic functions
 import metpy
 import metpy.calc as mpcalc
 import numpy as np
-import pint
 import pint_pandas as pp
 import xarray as xr
 
