@@ -20,9 +20,6 @@ _TEST_REQUIRES = [
     "pytest-yapf3>=0.4.0",
 ]
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
 setup(
     # Metadata
     name="pysonde",
@@ -31,6 +28,7 @@ setup(
     author="Hauke Schulz",
     author_email="",
     url="https://github.com/observingClouds/pysonde",
+    long_description = "Post-processing tool for atmospheric sounding data",
     # Package modules and data
     packages=find_packages(),
     # Requires
