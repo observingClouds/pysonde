@@ -28,7 +28,7 @@ setup(
     author="Hauke Schulz",
     author_email="",
     url="https://github.com/observingClouds/pysonde",
-    long_description = "Post-processing tool for atmospheric sounding data",
+    long_description="Post-processing tool for atmospheric sounding data",
     # Package modules and data
     packages=find_packages(),
     # Requires
