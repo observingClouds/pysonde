@@ -34,6 +34,13 @@ class MW41:
         # self.radiosondes_values = cfg.level0.radiosondes_sounding_items
         self.variable_name_mapping = cfg.level0.dictionary_input
         self.units = cfg.level0.input_units
+        self.unitregistry = self._create_unitregistry()
+
+    def _create_unitregistry(self):
+        ureg = pint.UnitRegistry()
+        ureg.define("fraction = [] = frac")
+        ureg.define("percent = 1e-2 frac = pct")
+        return ureg
 
     def read(self, mwx_file):
         def _get_flighttime(radio_time, start_time, launch_time):
@@ -86,10 +93,7 @@ class MW41:
         )
 
         # Attach units where provided
-        ureg = pint.UnitRegistry()
-        ureg.define("fraction = [] = frac")
-        ureg.define("percent = 1e-2 frac = pct")
-        pp.PintType.ureg = ureg
+        pp.PintType.ureg = self.unitregistry
         PA_ = pp.PintArray
 
         pd_snd_w_units = pd.DataFrame()
@@ -114,7 +118,7 @@ class MW41:
         sounding.meta_data["launch_time"] = launch_time
         sounding.meta_data["begin_time"] = begin_time_dt
         sounding.meta_data["station_altitude"] = station_altitude
-        sounding.unitregistry = ureg
+        sounding.unitregistry = self.unitregistry
         return sounding
 
 
