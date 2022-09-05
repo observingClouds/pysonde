@@ -72,6 +72,7 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
     array([  611.2129107 ,  2339.26239586,   125.58350529])
     """
     if isinstance(temperature, pp.pint_array.PintArray):
+        ureg = temperature.units._REGISTRY
         temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
@@ -100,13 +101,14 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
             ] * np.log(temp)
             e_sw[t] = np.exp(ln_e_sw)
         if isinstance(temperature, pp.pint_array.PintArray):
+            pp.PintType.ureg = ureg
             e_sw = pp.PintArray(e_sw, dtype="Pa")
         elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(
             temperature.data, "_units"
         ):
             e_sw = xr.DataArray(
                 e_sw, dims=temperature.dims, coords=temperature.coords
-            ) * metpy.units.units("Pa")
+            ) * ureg("Pa")
         return e_sw
 
 
@@ -120,9 +122,9 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
     else:
         vapor_pressure_Pa = vapor_pressure
     if "pint" in sounding.pressure.dtype.__str__():
-        total_pressure = sounding.pressure.pint.quantity.to("hPa").magnitude
+        total_pressure = sounding.pressure.values.quantity.to("hPa").magnitude
     else:
-        total_pressure = sounding.pressure
+        total_pressure = sounding.pressure.values
     wv_mix_ratio = 1000.0 * (
         (0.622 * vapor_pressure_Pa) / (100.0 * total_pressure - vapor_pressure_Pa)
     )
