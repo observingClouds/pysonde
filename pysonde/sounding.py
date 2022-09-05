@@ -317,6 +317,7 @@ class Sounding:
             campaign=cfg.main.campaign,
             campaign_id=cfg.main.campaign_id,
             direction=self.meta_data["sounding_direction"],
+            version=cfg.main.data_version,
         )
         output = self.meta_data["launch_time_dt"].strftime(output)
         directory = os.path.dirname(output)
