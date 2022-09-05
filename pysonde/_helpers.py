@@ -46,17 +46,6 @@ def get_version():
     except (ModuleNotFoundError, AttributeError):
         logging.debug("No pysonde package version found")
 
-    try:
-        version = (
-            sp.check_output(
-                ["git", "describe", "--always", "--dirty"], stderr=sp.STDOUT
-            )
-            .strip()
-            .decode()
-        )
-    except (sp.CalledProcessError, FileNotFoundError):
-        logging.debug("No git-version could be found.")
-
     return version
 
 
