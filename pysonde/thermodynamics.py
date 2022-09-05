@@ -39,7 +39,7 @@ def convert_rh_to_dewpoint(temperature, rh):
     kelvin = 15 * np.log(100 / rh) - 2 * (temperature_K - 273.15) + 2711.5
     t_dew = temperature_K * 2 * kelvin / (temperature_K * np.log(100 / rh) + 2 * kelvin)
     if isinstance(temperature, pp.pint_array.PintArray):
-        t_dew = t_dew * ureg["K"]
+        t_dew = t_dew * ureg("K")
     return t_dew
 
 
