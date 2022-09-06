@@ -234,7 +234,7 @@ def main(args=None):
                 ds_interp, ds, cfg, file, reader.variable_name_mapping_output.items()
             )
 
-            p2.export(args["output"], ds_interp)
+            p2.export(args["output"], ds_interp, cfg)
 
             # import pdb;
             # pdb.set_trace()

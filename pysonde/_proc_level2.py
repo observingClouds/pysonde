@@ -1,11 +1,14 @@
 import logging
+import os
 
 import metpy.calc as mpcalc
 import numpy as np
+import pandas as pd
 import pyproj
 import xarray as xr
 from metpy.units import units
 from omegaconf.errors import ConfigAttributeError
+from pathlib import Path
 
 from . import _helpers as h
 from . import meteorology_helpers as mh
@@ -441,7 +444,8 @@ def finalize_attrs(ds_interp, ds, cfg, file, variables):
     return ds_interp
 
 
-def export(out, ds_interp):
+def export(output_fmt, ds_interp, cfg):
+    """Saves sounding to disk"""
 
     if ds_interp.ascent_flag.values[0] == 0:
         direction = "AscentProfile"
@@ -449,16 +453,18 @@ def export(out, ds_interp):
         direction = "DescentProfile"
 
     # time_fmt = time_dt.strftime('%Y%m%dT%H%M')
-    outfile = (
-        out
-        + "{platform}_Radiosonde_{level}_{date_YYYYMMDDTHHMM}_{location_coord}_{direction}.nc".format(
-            platform=ds_interp.attrs["platform"],
-            level="Level2",
-            date_YYYYMMDDTHHMM=ds_interp.attrs["date_YYYYMMDDTHHMM"],
-            location_coord=ds_interp.attrs["location_coord"],
-            direction=direction,
-        )
+    outfile = output_fmt.format(
+        platform=cfg.main.platform,
+        campaign=cfg.main.campaign,
+        campaign_id=cfg.main.campaign_id,
+        direction=direction,
+        version=cfg.main.data_version,
+        level="2"
     )
+    launch_time = pd.to_datetime(ds_interp.launch_time.item(0))
+    outfile = launch_time.strftime(outfile)
+    directory = os.path.dirname(outfile)
+    Path(directory).mkdir(parents=True, exist_ok=True)
 
     logging.info("Write output to {}".format(outfile))
     h.write_dataset(ds_interp, outfile)
