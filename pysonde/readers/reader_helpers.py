@@ -192,7 +192,14 @@ def get_sounding_profile(file, keys):
             sounding_dict[i] = level_dict
     except KeyError:
         warnings.warn("Key {} not found.".format(var), VariableNotFoundInSounding)
-    pd_snd = pd.DataFrame.from_dict(sounding_dict, orient="index", dtype=float)
+    pd_snd = pd.DataFrame.from_dict(sounding_dict, orient="index")
+    types = {c:float for c in pd_snd.columns}
+    types["SoundingIdPk"] = str
+    types["DataSrvTime"] = str
+    types["PtuStatus"] = int
+    types["WindInterpolated"] = bool
+    types["Dropping"] = int
+    pd_snd = pd_snd.astype(types)
 
     # Set missing values to NaN
     pd_snd = pd_snd.replace(-32768, np.nan)
