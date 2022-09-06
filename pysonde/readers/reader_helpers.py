@@ -193,7 +193,7 @@ def get_sounding_profile(file, keys):
     except KeyError:
         warnings.warn("Key {} not found.".format(var), VariableNotFoundInSounding)
     pd_snd = pd.DataFrame.from_dict(sounding_dict, orient="index")
-    types = {c:float for c in pd_snd.columns}
+    types = {c: float for c in pd_snd.columns}
     types["SoundingIdPk"] = str
     types["DataSrvTime"] = str
     types["PtuStatus"] = int

@@ -459,7 +459,7 @@ def export(output_fmt, ds_interp, cfg):
         campaign_id=cfg.main.campaign_id,
         direction=direction,
         version=cfg.main.data_version,
-        level="2"
+        level="2",
     )
     launch_time = pd.to_datetime(ds_interp.launch_time.item(0))
     outfile = launch_time.strftime(outfile)
