@@ -108,7 +108,7 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
         ):
             e_sw = xr.DataArray(
                 e_sw, dims=temperature.dims, coords=temperature.coords
-            ) * ureg("Pa")
+            ) * metpy.units.units("Pa")
         return e_sw
 
 
