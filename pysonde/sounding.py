@@ -25,7 +25,10 @@ class Sounding:
     """Sounding class with processing functions"""
 
     def __init__(self, profile=None, meta_data={}, config=None, ureg=None):
-        self.profile = profile
+        if profile is None:
+            self.profile = None
+        else:
+            self.profile = profile.copy(deep=True)
         self.meta_data = meta_data
         self.config = config
         self.unitregistry = ureg
