@@ -390,11 +390,11 @@ class Sounding:
         Saves sounding to disk
         """
         output = output_fmt.format(
-            platform=cfg.main.platform,
-            campaign=cfg.main.campaign,
-            campaign_id=cfg.main.campaign_id,
+            platform=cfg.main.get('platform'),
+            campaign=cfg.main.get('campaign'),
+            campaign_id=cfg.main.get('campaign_id'),
             direction=self.meta_data["sounding_direction"],
-            version=cfg.main.data_version,
+            version=cfg.main.get('data_version'),
         )
         output = self.meta_data["launch_time_dt"].strftime(output)
         directory = os.path.dirname(output)
