@@ -60,7 +60,7 @@ def get_resolution(self):
     logging.debug("Gathering resolution information")
     import numpy as np
 
-    tindex = np.ma.masked_invalid(self.profile["flight_time"])
+    tindex = np.ma.masked_invalid(self.profile["flight_time"].squeeze())
     _, indices = np.unique(np.diff(tindex), return_inverse=True)
     timediff = np.diff(tindex) / np.timedelta64(1, "s")
     time_resolution = timediff[np.argmax(np.bincount(indices))]
