@@ -253,6 +253,9 @@ class Sounding:
                         config[f"level{level}"].variables[k].internal_varname
                     ].values
                 except KeyError:
+                    unset_vars[k] = (
+                        config[f"level{level}"].variables[k].internal_varname
+                    )
                     pass
                 continue
             try:
@@ -309,6 +312,7 @@ class Sounding:
             except KeyError:
                 print(f"KeyError for variable {k}")
                 unset_vars[k] = config[f"level{level}"].variables[k].internal_varname
+                pass
             except AttributeError:
                 logging.debug(f"{k} does not seem to have an internal varname")
                 pass
@@ -363,6 +367,8 @@ class Sounding:
                     ds[var_out].data = [id]
                 except ValueError:
                     ds = ds.assign_coords({var_out: [id]})
+            elif var_int == "platform":
+                ds[var_out].data = [config.main.platform]
 
         merged_conf = h.replace_placeholders_cfg(self, merged_conf)
 
