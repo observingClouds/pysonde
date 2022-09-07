@@ -322,6 +322,11 @@ class Sounding:
             direction = "descent"
         self.meta_data["sounding_direction"] = direction
 
+    def set_launchtime(self):
+        self.meta_data["launch_time_dt"] = pd.to_datetime(
+            self.profile.squeeze().flight_time.values[0]
+        )
+
     def export(self, output_fmt, cfg):
         """
         Saves sounding to disk
