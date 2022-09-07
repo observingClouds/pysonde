@@ -8,6 +8,7 @@ from pathlib import Path
 import _dataset_creator as dc
 import _helpers as h
 import numpy as np
+import pandas as pd
 import pint_pandas
 import pint_xarray
 import thermodynamics as td
@@ -201,18 +202,35 @@ class Sounding:
         self.generate_sounding_id(config)
         self.get_sonde_type()
 
-    def create_dataset(self, config):
+    def create_dataset(self, config, level=1):
         # Create new dataset
-        runtime_cfg = OmegaConf.create(
-            {"runtime": {"sounding_dim": 1, "level_dim": len(self.profile.flight_time)}}
-        )
+        if level == 1:
+            runtime_cfg = OmegaConf.create(
+                {
+                    "runtime": {
+                        "sounding_dim": 1,
+                        "level_dim": len(self.profile.flight_time),
+                    }
+                }
+            )
+        elif level == 2:
+            runtime_cfg = OmegaConf.create(
+                {
+                    "runtime": {
+                        "sounding_dim": 1,
+                        "level_dim": len(self.profile.altitude),
+                    }
+                }
+            )
 
         meta_data_cfg = OmegaConf.create(
             {"meta_level0": h.remove_nontype_keys(self.meta_data, type("str"))}
         )
 
         # meta_data_cfg = OmegaConf.create({"meta_level0": self.meta_data})
-        merged_conf = OmegaConf.merge(config.level1, meta_data_cfg, runtime_cfg)
+        merged_conf = OmegaConf.merge(
+            config[f"level{level}"], meta_data_cfg, runtime_cfg
+        )
         merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg, runtime_cfg))
         ds = dc.create_dataset(merged_conf)
 
@@ -223,7 +241,21 @@ class Sounding:
         # Fill dataset with data
         unset_vars = {}
 
-        for k in {**ds.coords, **ds.data_vars}.keys():
+        for var in self.profile.data_vars:
+            if var == "alt_bnds":
+                continue
+            if "sounding" not in self.profile[var].dims:
+                self.profile[var] = self.profile[var].expand_dims({"sounding": 1})
+        for k in {**ds.data_vars}.keys():
+            print(k)
+            if k == "launch_time":
+                try:
+                    ds[k].data = self.profile[
+                        config[f"level{level}"].variables[k].internal_varname
+                    ].values
+                except KeyError:
+                    pass
+                continue
             try:
                 isquantity = (
                     self.profile[
@@ -235,41 +267,32 @@ class Sounding:
                 dims = ds[k].dims
                 if "sounding" == dims[0]:
                     if isquantity:  # convert values to output unit
-                        ds[k].data = [
+                        ds[k].data = (
                             self.profile[
                                 config[f"level{level}"].variables[k].internal_varname
                             ]
                             .pint.to(ds[k].attrs["units"])
                             .pint.magnitude
-                        ]
+                        )
                     else:
-                        ds[k].data = [
-                            self.profile[
-                                config[f"level{level}"].variables[k].internal_varname
-                            ].values
-                        ]
+                        ds[k].data = self.profile[
+                            config[f"level{level}"].variables[k].internal_varname
+                        ].values
+
                 elif "sounding" == dims[1]:
                     if isquantity:  # convert values to output unit
                         ds[k].data = np.array(
-                            [
-                                self.profile[
-                                    config[f"level{level}"]
-                                    .variables[k]
-                                    .internal_varname
-                                ]
-                                .pint.to(ds[k].attrs["units"])
-                                .pint.magnitude
+                            self.profile[
+                                config[f"level{level}"].variables[k].internal_varname
                             ]
+                            .pint.to(ds[k].attrs["units"])
+                            .pint.magnitude
                         ).T
                     else:
                         ds[k].data = np.array(
-                            [
-                                self.profile[
-                                    config[f"level{level}"]
-                                    .variables[k]
-                                    .internal_varname
-                                ].values
-                            ]
+                            self.profile[
+                                config[f"level{level}"].variables[k].internal_varname
+                            ].values
                         ).T
                 else:
                     if isquantity:
@@ -284,6 +307,39 @@ class Sounding:
                         ds[k].data = self.profile[
                             config[f"level{level}"].variables[k].internal_varname
                         ].values
+            except KeyError:
+                print(f"KeyError for variable {k}")
+                unset_vars[k] = config[f"level{level}"].variables[k].internal_varname
+            except AttributeError:
+                logging.debug(f"{k} does not seem to have an internal varname")
+                pass
+
+        for k in ds.coords.keys():
+            try:
+                isquantity = (
+                    self.profile[
+                        config[f"level{level}"].coordinates[k].internal_varname
+                    ].pint.units
+                    is not None
+                )
+                if isquantity:  # convert values to output unit
+                    ds = ds.assign_coords(
+                        {
+                            k: self.profile[
+                                config[f"level{level}"].coordinates[k].internal_varname
+                            ]
+                            .pint.to(ds[k].attrs["units"])
+                            .pint.magnitude
+                        }
+                    )
+                else:
+                    ds = ds.assign_coords(
+                        {
+                            k: self.profile[
+                                config[f"level{level}"].coordinates[k].internal_varname
+                            ].values
+                        }
+                    )
             except KeyError:
                 unset_vars[k] = config[f"level{level}"].variables[k].internal_varname
             except AttributeError:
