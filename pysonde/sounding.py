@@ -247,7 +247,6 @@ class Sounding:
             if "sounding" not in self.profile[var].dims:
                 self.profile[var] = self.profile[var].expand_dims({"sounding": 1})
         for k in {**ds.data_vars}.keys():
-            print(k)
             if k == "launch_time":
                 try:
                     ds[k].data = self.profile[
