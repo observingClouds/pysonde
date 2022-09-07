@@ -239,71 +239,49 @@ class Sounding:
             if "sounding" not in self.profile[var].dims:
                 self.profile[var] = self.profile[var].expand_dims({"sounding": 1})
         for k in {**ds.data_vars}.keys():
+            int_var = config[f"level{level}"].variables[k].internal_varname
             if k == "launch_time":
                 try:
-                    ds[k].data = self.profile[
-                        config[f"level{level}"].variables[k].internal_varname
-                    ].values
+                    ds[k].data = self.profile[int_var].values
                 except KeyError:
-                    unset_vars[k] = (
-                        config[f"level{level}"].variables[k].internal_varname
-                    )
+                    unset_vars[k] = int_var
                     pass
                 continue
             try:
-                isquantity = (
-                    self.profile[
-                        config[f"level{level}"].variables[k].internal_varname
-                    ].pint.units
-                    is not None
-                )
+                isquantity = self.profile[int_var].pint.units is not None
 
                 dims = ds[k].dims
                 if "sounding" == dims[0]:
                     if isquantity:  # convert values to output unit
                         ds[k].data = (
-                            self.profile[
-                                config[f"level{level}"].variables[k].internal_varname
-                            ]
+                            self.profile[int_var]
                             .pint.to(ds[k].attrs["units"])
                             .pint.magnitude
                         )
                     else:
-                        ds[k].data = self.profile[
-                            config[f"level{level}"].variables[k].internal_varname
-                        ].values
+                        ds[k].data = self.profile[int_var].values
 
                 elif "sounding" == dims[1]:
                     if isquantity:  # convert values to output unit
                         ds[k].data = np.array(
-                            self.profile[
-                                config[f"level{level}"].variables[k].internal_varname
-                            ]
+                            self.profile[int_var]
                             .pint.to(ds[k].attrs["units"])
                             .pint.magnitude
                         ).T
                     else:
-                        ds[k].data = np.array(
-                            self.profile[
-                                config[f"level{level}"].variables[k].internal_varname
-                            ].values
-                        ).T
+                        ds[k].data = np.array(self.profile[int_var].values).T
                 else:
                     if isquantity:
                         ds[k].data = (
-                            self.profile[
-                                config[f"level{level}"].variables[k].internal_varname
-                            ]
+                            self.profile[int_var]
                             .pint.to(ds[k].attrs["units"])
                             .pint.magnitude
                         )
                     else:
-                        ds[k].data = self.profile[
-                            config[f"level{level}"].variables[k].internal_varname
-                        ].values
+                        ds[k].data = self.profile[int_var].values
             except KeyError:
                 print(f"KeyError for variable {k}")
-                unset_vars[k] = config[f"level{level}"].variables[k].internal_varname
+                unset_vars[k] = int_var
                 pass
             except AttributeError:
                 logging.debug(f"{k} does not seem to have an internal varname")
