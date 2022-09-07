@@ -22,7 +22,7 @@ coordinates:
     sounding:
         dimension: ${runtime.sounding_dim}
     alt:
-        dimension: ${runtime.alt_dim}
+        dimension: ${runtime.level_dim}
     nv:
         dimension: 2
 variables:
