@@ -112,6 +112,9 @@ def replace_placeholders_cfg(self, cfg, subset="global_attrs"):
         cfg[subset]["resolution"] = cfg[subset]["resolution"].format(
             resolution=resolution
         )
+    if "source" in cfg[subset].keys():
+        source = self.source
+        cfg[subset]["source"] = cfg[subset]["source"].format(input_file=source)
 
     return cfg
 

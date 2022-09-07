@@ -119,6 +119,7 @@ class MW41:
         sounding.meta_data["begin_time"] = begin_time_dt
         sounding.meta_data["station_altitude"] = station_altitude
         sounding.unitregistry = self.unitregistry
+        sounding.source = mwx_file
         return sounding
 
 
@@ -175,5 +176,6 @@ class pysondeL1:
         sounding = snd.Sounding()
         sounding.profile = ds
         sounding.unitregistry = ureg
+        sounding.source = L1_file
 
         return sounding

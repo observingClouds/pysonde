@@ -36,16 +36,10 @@ class Sounding:
     def split_by_direction(self, method="maxHeight"):
         """Split sounding into ascending and descending branch"""
         # Simple approach
-        sounding_ascent = Sounding(
-            self.profile.loc[self.profile.Dropping == 0],
-            copy.deepcopy(self.meta_data),
-            ureg=copy.deepcopy(self.unitregistry),
-        )
-        sounding_descent = Sounding(
-            self.profile.loc[self.profile.Dropping == 1],
-            copy.deepcopy(self.meta_data),
-            ureg=copy.deepcopy(self.unitregistry),
-        )
+        sounding_ascent = copy.deepcopy(self)
+        sounding_descent = copy.deepcopy(self)
+        sounding_ascent.profile = self.profile.loc[self.profile.Dropping == 0]
+        sounding_descent.profile = self.profile.loc[self.profile.Dropping == 1]
 
         # Bugfix 17
         if method == "maxHeight":
