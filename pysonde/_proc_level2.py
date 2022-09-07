@@ -8,7 +8,7 @@ import pandas as pd
 import pyproj
 import xarray as xr
 from metpy.units import units
-from omegaconf.errors import ConfigAttributeError
+from omegaconf.errors import ConfigAttributeError, ConfigKeyError
 
 from . import _helpers as h
 from . import meteorology_helpers as mh
@@ -22,7 +22,7 @@ def prepare_data_for_interpolation(ds, uni, variables, reader=pysondeL1):
     ds["u"] = xr.DataArray(u.data, dims=["level"])
     ds["v"] = xr.DataArray(v.data, dims=["level"])
 
-    if "altitude_WGS84" in ds.keys():
+    if "alt_WGS84" in ds.keys():
         # Convert lat, lon, alt to cartesian coordinates
         ecef = pyproj.Proj(proj="geocent", ellps="WGS84", datum="WGS84")
         lla = pyproj.Proj(proj="latlong", ellps="WGS84", datum="WGS84")
@@ -31,10 +31,9 @@ def prepare_data_for_interpolation(ds, uni, variables, reader=pysondeL1):
             ecef,
             ds.lon.values,
             ds.lat.values,
-            ds.altitude_WGS84.values,
+            ds["alt_WGS84"].values,
             radians=False,
         )
-        reader.variable_name_mapping.update({"x": "x", "y": "y", "z": "z"})
         for var, val in {"x": x, "y": y, "z": z}.items():
             ds[var] = xr.DataArray(val, dims=["level"])
     else:
@@ -182,6 +181,7 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
     dims_2d = ["sounding", "alt"]
     dims_1d = ["alt"]
     coords_1d = {"alt": ds_interp.alt.data}
+    ureg = ds["lat"].pint.units._REGISTRY
 
     wind_u = ds_interp.isel({"sounding": 0})["wind_u"]
     wind_v = ds_interp.isel({"sounding": 0})["wind_v"]
@@ -194,28 +194,35 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
         wsp.expand_dims({"sounding": 1}).data, dims=dims_2d, coords=coords_1d
     )
 
-    if "altitude_WGS84" in ds.keys():
+    if "alt_WGS84" in ds.keys():
         ecef = pyproj.Proj(proj="geocent", ellps="WGS84", datum="WGS84")
         lla = pyproj.Proj(proj="latlong", ellps="WGS84", datum="WGS84")
         lon, lat, alt = pyproj.transform(
             ecef,
             lla,
-            ds_interp["x"].values[0],
-            ds_interp["y"].values[0],
-            ds_interp["z"].values[0],
+            ds_interp["x"].values,
+            ds_interp["y"].values,
+            ds_interp["z"].values,
             radians=False,
         )
-        for var, val in {
-            "latitude": lat,
-            "longitude": lon,
-            "altitude_WGS84": alt,
-        }.items():
-            ds_interp[var] = xr.DataArray([val], dims=dims_2d, coords=coords_1d)
 
+        for var, val in {
+            "lat": lat,
+            "lon": lon,
+            "alt_WGS84": alt,
+        }.items():
+            try:
+                ds_interp[var] = xr.DataArray(
+                    val, dims=dims_1d, coords=coords_1d
+                ).pint.quantify(
+                    cfg.level2.variables[var].attrs.units, unit_registry=ureg
+                )
+            except ConfigKeyError:
+                pass
         del ds_interp["x"]
         del ds_interp["y"]
         del ds_interp["z"]
-        del ds_interp["altitude_WGS84"]
+        del ds_interp["alt_WGS84"]
 
     ds_input = ds_input.sortby("alt")
     ds_input.alt.load()
