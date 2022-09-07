@@ -2,7 +2,6 @@ import inspect
 import logging
 import platform
 import re
-import subprocess as sp
 import time
 from pathlib import Path, PureWindowsPath
 
