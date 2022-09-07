@@ -143,6 +143,8 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
             + cfg.level2.setup.interpolation_grid_inc / 2,
             cfg.level2.setup.interpolation_grid_inc,
         )
+        # Workaround for issue https://github.com/pydata/xarray/issues/6995
+        ds_new['flight_time'] = ds_new.flight_time.astype(int)
         ds_interp = ds_new.groupby_bins(
             "altitude",
             interpolation_bins,
@@ -162,23 +164,15 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
         ds_interp["launch_time"] = ds_new["launch_time"]
 
         ## Interpolation NaN
+        units = {v: ds_interp[v].pint.units for v in ds_interp.data_vars}
         ds_interp = ds_interp.interpolate_na(
             "alt", max_gap=cfg.level2.setup.max_gap_fill, use_coordinate=True
         )
+        ds_interp = ds_interp.pint.quantify(
+            units
+        )  # pint.interpolate_na does not support max_gap yet and looses units
 
-        for var_in, var_out in variables:
-            try:
-                ds_interp[var_out] = ds_interp[var_out].pint.quantify(
-                    ds_new[var_out].pint.units
-                )
-                ds_interp[var_out] = ds_interp[var_out].pint.to(
-                    cfg.level2.variables[var_in].attrs.units
-                )
-            except (KeyError, ValueError, ConfigAttributeError) as e:
-                logging.warning(
-                    f"Likely no unit has been found for {var_in}, raising {e}"
-                )
-                pass
+        ds_interp['flight_time'] = ds_interp.flight_time.astype('datetime64[ns]')
 
     return ds_interp
 
