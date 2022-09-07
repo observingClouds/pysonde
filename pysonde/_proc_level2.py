@@ -279,15 +279,6 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
 
     for var_in, var_out in variables:
         try:
-            # ds_interp[var_out] = ds_interp[var_out].pint.quantify(ds_new[var_out].pint.units)
-            ds_interp[var_out] = ds_interp[var_out].pint.to(
-                cfg.level2.variables[var_in].attrs.units
-            )
-        except (ValueError, KeyError, ConfigAttributeError):
-            pass
-
-    for var_in, var_out in variables:
-        try:
             if (
                 not ds_interp[var_out].dtype
                 == cfg.level2.variables[var_in].encodings.dtype
