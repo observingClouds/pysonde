@@ -387,8 +387,11 @@ class Sounding:
         self.meta_data["sounding_direction"] = direction
 
     def set_launchtime(self):
+        first_idx_w_time = np.argwhere(
+            ~np.isnan(self.profile.squeeze().flight_time.values)
+        )[0][0]
         self.meta_data["launch_time_dt"] = pd.to_datetime(
-            self.profile.squeeze().flight_time.values[0]
+            self.profile.squeeze().flight_time.values[first_idx_w_time]
         )
 
     def export(self, output_fmt, cfg):
