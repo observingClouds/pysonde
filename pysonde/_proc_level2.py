@@ -144,7 +144,7 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
             cfg.level2.setup.interpolation_grid_inc,
         )
         # Workaround for issue https://github.com/pydata/xarray/issues/6995
-        ds_new['flight_time'] = ds_new.flight_time.astype(int)
+        ds_new["flight_time"] = ds_new.flight_time.astype(int)
         ds_interp = ds_new.groupby_bins(
             "altitude",
             interpolation_bins,
@@ -172,7 +172,7 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
             units
         )  # pint.interpolate_na does not support max_gap yet and looses units
 
-        ds_interp['flight_time'] = ds_interp.flight_time.astype('datetime64[ns]')
+        ds_interp["flight_time"] = ds_interp.flight_time.astype("datetime64[ns]")
 
     return ds_interp
 
