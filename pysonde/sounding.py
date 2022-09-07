@@ -368,7 +368,7 @@ class Sounding:
                 except ValueError:
                     ds = ds.assign_coords({var_out: [id]})
             elif var_int == "platform":
-                ds[var_out].data = [config.main.platform]
+                ds[var_out].data = [config.main.platform_number]
 
         merged_conf = h.replace_placeholders_cfg(self, merged_conf)
 
