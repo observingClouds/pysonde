@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 import metpy.calc as mpcalc
 import numpy as np
@@ -8,7 +9,6 @@ import pyproj
 import xarray as xr
 from metpy.units import units
 from omegaconf.errors import ConfigAttributeError
-from pathlib import Path
 
 from . import _helpers as h
 from . import meteorology_helpers as mh
