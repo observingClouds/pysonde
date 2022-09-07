@@ -315,6 +315,13 @@ class Sounding:
 
         self.dataset = ds
 
+    def get_direction(self):
+        if self.profile.ascent_flag.values[0] == 0:
+            direction = "ascent"
+        elif self.profile.ascent_flag.values[0] == 1:
+            direction = "descent"
+        self.meta_data["sounding_direction"] = direction
+
     def export(self, output_fmt, cfg):
         """
         Saves sounding to disk
