@@ -202,36 +202,28 @@ class Sounding:
         self.generate_sounding_id(config)
         self.get_sonde_type()
 
-    def create_dataset(self, config, level=1):
-        # Create new dataset
-        if level == 1:
-            runtime_cfg = OmegaConf.create(
-                {
-                    "runtime": {
-                        "sounding_dim": 1,
-                        "level_dim": len(self.profile.flight_time),
-                    }
+    def collect_config(self, config, level):
+        level_dims = {1: "flight_time", 2: "altitude"}
+        runtime_cfg = OmegaConf.create(
+            {
+                "runtime": {
+                    "sounding_dim": 1,
+                    "level_dim": len(self.profile[level_dims[level]]),
                 }
-            )
-        elif level == 2:
-            runtime_cfg = OmegaConf.create(
-                {
-                    "runtime": {
-                        "sounding_dim": 1,
-                        "level_dim": len(self.profile.altitude),
-                    }
-                }
-            )
-
+            }
+        )
         meta_data_cfg = OmegaConf.create(
             {"meta_level0": h.remove_nontype_keys(self.meta_data, type("str"))}
         )
 
-        # meta_data_cfg = OmegaConf.create({"meta_level0": self.meta_data})
         merged_conf = OmegaConf.merge(
             config[f"level{level}"], meta_data_cfg, runtime_cfg
         )
         merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg, runtime_cfg))
+        return merged_conf
+
+    def create_dataset(self, config, level=1):
+        merged_conf = self.collect_config(config, level)
         ds = dc.create_dataset(merged_conf)
 
         ds.flight_time.data = xr.DataArray(
