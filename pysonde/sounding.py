@@ -322,6 +322,7 @@ class Sounding:
                     ].pint.units
                     is not None
                 )
+                coord_dtype = config[f"level{level}"].coordinates[k].encodings.dtype
                 if isquantity:  # convert values to output unit
                     ds = ds.assign_coords(
                         {
@@ -340,6 +341,8 @@ class Sounding:
                             ].values
                         }
                     )
+                if coord_dtype is not None:
+                    ds[k].encoding["dtype"] = coord_dtype
             except KeyError:
                 unset_vars[k] = config[f"level{level}"].variables[k].internal_varname
             except AttributeError:
