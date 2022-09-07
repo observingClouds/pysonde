@@ -74,6 +74,8 @@ def set_coords(cfg, ds):
                 ds = ds.assign_coords({coord: params["dimension"]})
             if "attrs" in params.keys():
                 ds[coord].attrs = params["attrs"]
+            if "encodings" in params.keys():
+                ds[coord].encoding = params["encodings"]
     return ds
 
 
