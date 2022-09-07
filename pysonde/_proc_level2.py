@@ -294,13 +294,6 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
         except KeyError:
             pass
 
-    # for variable in ['mixing_ratio', 'theta',
-    #                   'specific_humidity', 'ascent_rate', 'altitude', 'latitude',
-    #                   'longitude', 'wind_u',
-    #                   'wind_v', 'alt_bnds'
-    #                   ]:
-    #     ds_interp[variable] = ds_interp[variable].expand_dims({'sounding':1})
-
     return ds_interp
 
 
