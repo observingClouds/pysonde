@@ -277,23 +277,6 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
         "g/g"
     )
 
-    for var_in, var_out in variables:
-        try:
-            if (
-                not ds_interp[var_out].dtype
-                == cfg.level2.variables[var_in].encodings.dtype
-            ):
-                ds_interp[var_out] = ds_interp[var_out].astype(
-                    cfg.level2.variables[var_in].encodings.dtype
-                )
-        except KeyError:
-            pass
-
-        try:
-            ds_interp[var_out].encoding = cfg.level2.variables[var_in].encodings
-        except KeyError:
-            pass
-
     return ds_interp
 
 
