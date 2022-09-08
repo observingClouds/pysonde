@@ -40,9 +40,9 @@ def calc_saturation_pressure(temperature_K, method="hardy1998"):
 
     if method == "hardy1998":
         g = np.empty(8)
-        g[0] = -2.8365744 * 10 ** 3
-        g[1] = -6.028076559 * 10 ** 3
-        g[2] = 1.954263612 * 10 ** 1
+        g[0] = -2.8365744 * 10**3
+        g[1] = -6.028076559 * 10**3
+        g[2] = 1.954263612 * 10**1
         g[3] = -2.737830188 * 10 ** (-2)
         g[4] = 1.6261698 * 10 ** (-5)
         g[5] = 7.0229056 * 10 ** (-10)
@@ -205,7 +205,7 @@ def get_directional_wind(u, v):
     # dir = np.rad2deg(np.arctan2(-1*u, -1*v)) % 360
     dir = np.rad2deg(np.arctan2(-1 * u, -1 * v))
     dir = np.mod(dir, 360)
-    spd = np.sqrt(u ** 2 + v ** 2)
+    spd = np.sqrt(u**2 + v**2)
 
     return dir, spd
 
