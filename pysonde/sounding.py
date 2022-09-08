@@ -226,7 +226,7 @@ class Sounding:
     def isquantity(self, ds):
         return ds.pint.units is not None
 
-    def set_unset_vars(self, ds, unset_vars, config, level):
+    def set_unset_items(self, ds, unset_vars, config, level):
         for var_out, var_int in unset_vars.items():
             if var_int == "launch_time":
                 ds[var_out].data = [self.meta_data["launch_time_dt"]]
@@ -245,6 +245,33 @@ class Sounding:
             elif var_int == "platform":
                 ds[var_out].data = [config.main.platform_number]
         return ds
+
+    def set_coordinate_data(self, ds, coords, config):
+        unset_coords = {}
+        for k in ds.coords.keys():
+            try:
+                int_var = config.coordinates[k].internal_varname
+            except ConfigAttributeError:
+                logging.debug(f"{k} does not seem to have an internal varname")
+                continue
+            except KeyError:
+                logging.warning(f"KeyError for variable {k}")
+                unset_coords[k] = int_var
+                pass
+            if self.isquantity(self.profile[int_var]):  # convert values to output unit
+                ds = ds.assign_coords(
+                    {
+                        k: self.profile[int_var]
+                        .pint.to(ds[k].attrs["units"])
+                        .pint.magnitude
+                    }
+                )
+            else:
+                ds = ds.assign_coords({k: self.profile[int_var].values})
+            coord_dtype = config.coordinates[k].get("encodings").get("dtype")
+            if coord_dtype is not None:
+                ds[k].encoding["dtype"] = coord_dtype
+        return ds, unset_coords
 
     def create_dataset(self, config, level=1):
         merged_conf = self.collect_config(config, level)
@@ -294,33 +321,11 @@ class Sounding:
                     ds[k].data = np.array(self.profile[int_var].values).T
                 else:
                     ds[k].data = self.profile[int_var].values
-        for k in ds.coords.keys():
-            try:
-                int_var = config[f"level{level}"].coordinates[k].internal_varname
-            except ConfigAttributeError:
-                logging.debug(f"{k} does not seem to have an internal varname")
-                continue
-            except KeyError:
-                logging.warning(f"KeyError for variable {k}")
-                unset_vars[k] = int_var
-                pass
-            if self.isquantity(self.profile[int_var]):  # convert values to output unit
-                ds = ds.assign_coords(
-                    {
-                        k: self.profile[int_var]
-                        .pint.to(ds[k].attrs["units"])
-                        .pint.magnitude
-                    }
-                )
-            else:
-                ds = ds.assign_coords({k: self.profile[int_var].values})
-            coord_dtype = (
-                config[f"level{level}"].coordinates[k].get("encodings").get("dtype")
-            )
-            if coord_dtype is not None:
-                ds[k].encoding["dtype"] = coord_dtype
-
-        ds = self.set_unset_vars(ds, unset_vars, config, level)
+        ds, unset_coords = self.set_coordinate_data(
+            ds, ds.coords, config[f"level{level}"]
+        )
+        unset_items = {**unset_vars, **unset_coords}
+        ds = self.set_unset_items(ds, unset_items, config, level)
         merged_conf = h.replace_placeholders_cfg(self, merged_conf)
 
         logging.debug("Add global attributes")
