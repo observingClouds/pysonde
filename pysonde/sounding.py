@@ -268,7 +268,9 @@ class Sounding:
                 )
             else:
                 ds = ds.assign_coords({k: self.profile[int_var].values})
-            coord_dtype = config.coordinates[k].get("encodings").get("dtype")
+            coord_dtype = config.coordinates[k].get("encodings")
+            if coord_dtype is not None:
+                coord_dtype = coord_dtype.get("dtype")
             if coord_dtype is not None:
                 ds[k].encoding["dtype"] = coord_dtype
         return ds, unset_coords
