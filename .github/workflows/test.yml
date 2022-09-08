@@ -21,6 +21,9 @@ jobs:
         run: |
           pip install pipenv
           pipenv install --deploy --dev
+          pipenv graph
+          pipenv update
+          pipenv graph
 
       - run: pipenv run isort --recursive --diff .
       - run: pipenv run black --check --diff .
