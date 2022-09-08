@@ -1,6 +1,5 @@
 global_attrs:
     title: ${main.campaign} level 1 sounding data
-    description: ???
     location: ${main.location}
     location_coord: "{location_coordinates}"
     campaign_id: ${main.campaign_id}

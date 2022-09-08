@@ -234,10 +234,11 @@ def main(args=None):
                 ds_interp, ds, cfg, file, reader.variable_name_mapping_output.items()
             )
 
-            p2.export(args["output"], ds_interp)
-
-            # import pdb;
-            # pdb.set_trace()
+            sounding.profile = ds_interp
+            sounding.create_dataset(cfg, level=2)
+            sounding.get_direction()
+            sounding.set_launchtime()
+            sounding.export(args["output"], cfg)
 
 
 if __name__ == "__main__":

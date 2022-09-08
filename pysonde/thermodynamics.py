@@ -39,7 +39,7 @@ def convert_rh_to_dewpoint(temperature, rh):
     kelvin = 15 * np.log(100 / rh) - 2 * (temperature_K - 273.15) + 2711.5
     t_dew = temperature_K * 2 * kelvin / (temperature_K * np.log(100 / rh) + 2 * kelvin)
     if isinstance(temperature, pp.pint_array.PintArray):
-        t_dew = t_dew * ureg["K"]
+        t_dew = t_dew * ureg("K")
     return t_dew
 
 
@@ -72,6 +72,7 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
     array([  611.2129107 ,  2339.26239586,   125.58350529])
     """
     if isinstance(temperature, pp.pint_array.PintArray):
+        ureg = temperature.units._REGISTRY
         temperature_K = temperature.quantity.to(
             "K"
         ).magnitude  # would be better to stay unit aware
@@ -100,6 +101,7 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
             ] * np.log(temp)
             e_sw[t] = np.exp(ln_e_sw)
         if isinstance(temperature, pp.pint_array.PintArray):
+            pp.PintType.ureg = ureg
             e_sw = pp.PintArray(e_sw, dtype="Pa")
         elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(
             temperature.data, "_units"
@@ -120,9 +122,9 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
     else:
         vapor_pressure_Pa = vapor_pressure
     if "pint" in sounding.pressure.dtype.__str__():
-        total_pressure = sounding.pressure.pint.quantity.to("hPa").magnitude
+        total_pressure = sounding.pressure.values.quantity.to("hPa").magnitude
     else:
-        total_pressure = sounding.pressure
+        total_pressure = sounding.pressure.values
     wv_mix_ratio = 1000.0 * (
         (0.622 * vapor_pressure_Pa) / (100.0 * total_pressure - vapor_pressure_Pa)
     )

@@ -1,6 +1,7 @@
 campaign: EUREC4A
 campaign_id: EUREC4A
 platform: BCO
+platform_number: 1
 location: Deebles Point
 configs:
     main: config/main.yaml  # name of this file

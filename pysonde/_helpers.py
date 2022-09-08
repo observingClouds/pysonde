@@ -2,7 +2,6 @@ import inspect
 import logging
 import platform
 import re
-import subprocess as sp
 import time
 from pathlib import Path, PureWindowsPath
 
@@ -46,17 +45,6 @@ def get_version():
     except (ModuleNotFoundError, AttributeError):
         logging.debug("No pysonde package version found")
 
-    try:
-        version = (
-            sp.check_output(
-                ["git", "describe", "--always", "--dirty"], stderr=sp.STDOUT
-            )
-            .strip()
-            .decode()
-        )
-    except (sp.CalledProcessError, FileNotFoundError):
-        logging.debug("No git-version could be found.")
-
     return version
 
 
@@ -71,7 +59,7 @@ def get_resolution(self):
     logging.debug("Gathering resolution information")
     import numpy as np
 
-    tindex = np.ma.masked_invalid(self.profile["flight_time"])
+    tindex = np.ma.masked_invalid(self.profile["flight_time"].squeeze())
     _, indices = np.unique(np.diff(tindex), return_inverse=True)
     timediff = np.diff(tindex) / np.timedelta64(1, "s")
     time_resolution = timediff[np.argmax(np.bincount(indices))]
@@ -123,6 +111,9 @@ def replace_placeholders_cfg(self, cfg, subset="global_attrs"):
         cfg[subset]["resolution"] = cfg[subset]["resolution"].format(
             resolution=resolution
         )
+    if "source" in cfg[subset].keys():
+        source = self.source
+        cfg[subset]["source"] = cfg[subset]["source"].format(input_file=source)
 
     return cfg
 
