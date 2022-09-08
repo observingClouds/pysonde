@@ -361,5 +361,6 @@ class Sounding:
         output = self.meta_data["launch_time_dt"].strftime(output)
         directory = os.path.dirname(output)
         Path(directory).mkdir(parents=True, exist_ok=True)
+        self.dataset.encoding["unlimited_dims"] = ["sounding"]
         self.dataset.to_netcdf(output)
         logging.info(f"Sounding written to {output}")
