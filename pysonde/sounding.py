@@ -231,17 +231,10 @@ class Sounding:
             if var_int == "launch_time":
                 ds[var_out].data = [self.meta_data["launch_time_dt"]]
             elif var_int == "sounding":
-                lat = self.profile["latitude"][0].values
-                lon = self.profile["longitude"][0].values
-                direction = self.meta_data["sounding_direction"]
-                time = self.meta_data["launch_time_dt"]
-                id_fmt = config[f"level{level}"].variables[var_int].format
-                id = id_fmt.format(lat=lat, lon=lon, direction=direction)
-                id = time.strftime(id)
                 try:
-                    ds[var_out].data = [id]
+                    ds[var_out].data = [self.meta_data["sounding"]]
                 except ValueError:
-                    ds = ds.assign_coords({var_out: [id]})
+                    ds = ds.assign_coords({var_out: [self.meta_data["sounding"]]})
             elif var_int == "platform":
                 ds[var_out].data = [config.main.platform_number]
         return ds
