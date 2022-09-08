@@ -289,7 +289,7 @@ class Sounding:
                 continue
             if "sounding" not in self.profile[var].dims:
                 self.profile[var] = self.profile[var].expand_dims({"sounding": 1})
-        for k in {**ds.data_vars}.keys():
+        for k in ds.data_vars.keys():
             try:
                 int_var = config[f"level{level}"].variables[k].internal_varname
             except ConfigAttributeError:
