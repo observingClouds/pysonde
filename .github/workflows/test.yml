@@ -10,20 +10,30 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: conda-incubator/setup-miniconda@v2
         with:
+          auto-update-conda: false
+          channels: conda-forge
+          mamba-version: '*'
+          activate-environment: pysonde
           python-version: 3.9
 
-      - name: Install dependencies with pipenv
+      - name: Set up conda environment
         run: |
-          pip install pipenv
-          pipenv install --deploy --dev
+          mamba env update -f requirements.txt -n pysonde
+      - name: Conda info
+        run: conda info
+      - name: Conda list
+        run: mamba list
+      - name: Install pysonde
+        run: |
+          pip install .
 
-      - run: pipenv run isort --recursive --diff .
-      - run: pipenv run black --check --diff .
-      - run: pipenv run flake8
-      - run: pipenv run mypy
-      - run: pipenv run pytest --cov --cov-fail-under=50
+      - run: isort --recursive --diff .
+      - run: black --check --diff .
+      - run: flake8
+      - run: mypy
+      - run: pytest --cov --cov-fail-under=50
