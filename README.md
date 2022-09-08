@@ -1,10 +1,10 @@
-# pySonde
+# pySonde: converting radiosonde files to netcdf
+
+pySonde converts Vaisala's radiosonde files (mwx) to netCDF4 and interpolates them if needed to a common height grid for easier processing.
 
 ## Setup
 ```
-pip install -r requirements.txt
-python setup.py sdist
-pip install dist/pysonde*.tar.gz
+pip install pysonde
 ```
 
 For development
@@ -31,21 +31,8 @@ Windows:
 sounding_converter.exe -i examples/level0/BCO_20200126_224454.mwx -o "test_{direction}.nc" -c config/main.yaml
 ```
 
-## Simple Plotting
+The configuration of attributes, variable names and units of the input and output is done via yaml files in the `config` folder.
 
-The package also includes a few plotting routines that can be called with e.g.
+To post-process radiosoundings with pysonde and track the processing steps, a new repository should be created that only contains the `config` folder and its scripts. An additional bash script with the `sounding_converter` calls tracks the processing steps. The version used of pysonde is automatically inserted into the output files.
 
-Unix:
-```sh
-sounding_visualize -i converted/file/sounding.nc
-```
-
-## SkewT Plotting
-
-A skewT diagram can be created with
-
-Unix:
-
-```sh
-sounding_skewT -i converted/file/sounding.nc
-```
+The [repository containing the processing setup for the circBrazil campaign](https://github.com/observingClouds/soundings_circbrazil) can serve as a template.
