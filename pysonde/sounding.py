@@ -156,8 +156,8 @@ class Sounding:
             direction=self.meta_data["sounding_direction"],
             lat=self.profile.latitude.values[0],
             lon=self.profile.longitude.values[0],
-            time=self.meta_data["launch_time_dt"].strftime("%Y%m%d%H%M"),
         )
+        id = self.meta_data["launch_time_dt"].strftime(id)
         self.meta_data["sounding"] = id
 
     def get_sonde_type(self):
@@ -247,11 +247,13 @@ class Sounding:
             except ConfigAttributeError:
                 logging.debug(f"{k} does not seem to have an internal varname")
                 continue
-            except KeyError:
-                logging.warning(f"KeyError for variable {k}")
+            if int_var not in self.profile:
+                logging.warning(f"No data for output variable {k} found in input.")
                 unset_coords[k] = int_var
                 pass
-            if self.isquantity(self.profile[int_var]):  # convert values to output unit
+            elif self.isquantity(
+                self.profile[int_var]
+            ):  # convert values to output unit
                 ds = ds.assign_coords(
                     {
                         k: self.profile[int_var]
