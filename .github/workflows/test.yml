@@ -19,11 +19,10 @@ jobs:
           channels: conda-forge
           mamba-version: '*'
           activate-environment: pysonde
+          environment-name: pysonde
+          environment-file: requirements.txt
           python-version: 3.9
 
-      - name: Set up conda environment
-        run: |
-          mamba env update -f requirements.txt -n pysonde
       - name: Conda info
         run: conda info
       - name: Conda list
