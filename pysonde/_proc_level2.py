@@ -180,8 +180,8 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
 
     dims_2d = ["sounding", "alt"]
     dims_1d = ["alt"]
-    coords_1d = {"alt": ds_interp.alt.data}
     ureg = ds["lat"].pint.units._REGISTRY
+    coords_1d = {"alt": ds_interp.alt.pint.quantify("m", unit_registry=ureg)}
 
     wind_u = ds_interp.isel({"sounding": 0})["wind_u"]
     wind_v = ds_interp.isel({"sounding": 0})["wind_v"]
@@ -299,7 +299,7 @@ def count_number_of_measurement_within_bin(ds_interp, ds_new, cfg, interpolation
 
     # Count number of measurements within each bin
     dims_2d = ["sounding", "alt"]
-    coords_1d = {"alt": ds_interp.alt.data}
+    coords_1d = {"alt": ds_interp.alt}
 
     ds_interp["N_ptu"] = xr.DataArray(
         ds_new.pressure.groupby_bins(

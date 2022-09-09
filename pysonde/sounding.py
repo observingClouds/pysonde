@@ -262,7 +262,7 @@ class Sounding:
                     }
                 )
             else:
-                ds = ds.assign_coords({k: self.profile[int_var].values})
+                ds = ds.assign_coords({k: self.profile[int_var].pint.dequantify()})
             coord_dtype = config.coordinates[k].get("encodings")
             if coord_dtype is not None:
                 coord_dtype = coord_dtype.get("dtype")
