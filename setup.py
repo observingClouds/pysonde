@@ -6,14 +6,18 @@ from setuptools import find_packages, setup
 
 import versioneer
 
-with open("requirements.txt") as f:
-    requirements = f.read().strip().split("\n")
-
 _TEST_REQUIRES = [
     "mock",
     "pytest",
+    "pytest-pycodestyle",
     "pytest-cov",
-    "pytest-pytest-lazy-fixture",
+    "pytest-pydocstyle",
+    "pytest-flake8",
+    "pytest-isort",
+    "pytest-mock",
+    "pytest-pep8",
+    "pytest-pylint",
+    "pytest-yapf3>=0.4.0",
 ]
 
 setup(
@@ -29,7 +33,7 @@ setup(
     packages=find_packages(),
     # Requires
     python_requires=">=3.5",
-    install_requires=requirements,
+    install_requires=[],
     setup_requires=[
         "pytest-runner",
         "setuptools-scm",
@@ -42,9 +46,6 @@ setup(
             "isort",
             "pylint<2.3.0",
             "yapf",
-            "black",
-            "pre-commit",
-            "mypy",
         ],
     },
     package_data={"pysonde": []},
