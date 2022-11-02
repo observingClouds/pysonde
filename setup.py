@@ -13,7 +13,7 @@ _TEST_REQUIRES = [
     "mock",
     "pytest",
     "pytest-cov",
-    "pytest-pytest-lazy-fixture",
+    "pytest-lazy-fixture",
     "flake8",
     "isort",
     "black",
