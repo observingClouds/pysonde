@@ -19,7 +19,7 @@ jobs:
 
       - name: Install dependencies with pip
         run: |
-          python -m pip install -e .
+          python -m pip install -e .[dev]
 
       - run: isort --recursive --diff .
       - run: black --check --diff .
