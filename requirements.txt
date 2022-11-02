@@ -1,11 +1,7 @@
-black
 bottleneck
 coverage==5.3.1
 dask
-flake8
-isort
 metpy
-mypy
 netCDF4
 numpy
 omegaconf
@@ -13,9 +9,6 @@ pandas
 Pint<=0.17
 Pint-Pandas
 pint-xarray
-pre-commit
-pytest
-pytest-cov
 PyYAML
 regex
 tqdm
