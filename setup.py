@@ -14,6 +14,10 @@ _TEST_REQUIRES = [
     "pytest",
     "pytest-cov",
     "pytest-pytest-lazy-fixture",
+    "flake8",
+    "isort",
+    "black",
+    "mypy",
 ]
 
 setup(
@@ -38,13 +42,9 @@ setup(
     extras_require={
         "dev": _TEST_REQUIRES
         + [
-            "flake8",
-            "isort",
             "pylint<2.3.0",
             "yapf",
-            "black",
             "pre-commit",
-            "mypy",
         ],
     },
     package_data={"pysonde": []},
