@@ -10,7 +10,7 @@ netCDF4
 numpy
 omegaconf
 pandas
-Pint
+Pint<=0.17
 Pint-Pandas
 pint-xarray
 pre-commit
