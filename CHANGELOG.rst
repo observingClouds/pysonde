@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-0.0.4 (unreleased)
+0.0.4 (2022-11-02)
 ------------------
 
 * Add pip install dependencies (:issue:`16`, :pr:`19`) `Hauke Schulz`_.
