@@ -37,7 +37,9 @@ setup(
     setup_requires=[
         "pytest-runner",
         "setuptools-scm",
+        "setuptools>=30.3.0",
     ],
+    include_package_data=True,
     tests_require=_TEST_REQUIRES,
     extras_require={
         "dev": _TEST_REQUIRES
@@ -61,6 +63,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
     ],
+    zip_safe=False,
     entry_points={
         "console_scripts": [
             "sounding_converter=pysonde.pysonde:main",
