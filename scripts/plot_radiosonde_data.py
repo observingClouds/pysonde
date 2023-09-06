@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Plot radiosonde data in terminal
+Plot radiosonde level 1 data
 
 Created on Sun Jan 29, 2023
 
 @author: laura
 
-run in terminal via:
+run the script:
     python make_plots_radiosonde.py -i inputfilename -o outputdirectory
-for inputfilenames of the form "{ship}_{date}_{time}_{direction}.nc" (e.g. MARIA_S_MERIAN_20221102_110535_ascent.nc),
-the required inputfilename is "{ship}_{date}_{time}" (e.g. MARIA_S_MERIAN_20221102_110535).
+for level 1 radiosonde files. The inputfilename should include the direction (ascent or descent). If not, no SkewT diagram is made.
 
-This script produces 5 plots:
-    - the trajectory of the radiosonde
-    - Wind speed and direction of ascent and descent
-    - temperature T, dew point tau, relative humidity rh, and water vapor mixing ratio for ascent and descent
-    - SkewT diagram of ascent
-    - SkewT diagram of descent
+This script produces 3 plots:
+    - trajectory
+    - temperature T, dew point tau, relative humidity rh, water vapor mixing ratio, wind speed, and wind direction
+    - SkewT diagram (only if direction, i.e. ascent or descent, is given in inputfilename)
 """
 
 import argparse
@@ -72,16 +69,31 @@ def main():
 
     # Define input file
     filename = args["inputfile"]
+
+    data = xr.open_dataset(filename)
+    if "ascent" in filename:
+        direction = "ascent"
+    elif "descent" in filename:
+        direction = "descent"
+    else:
+        direction = "unknown"
+
+    quantities_color = "steelblue"
+
+    # Check and create out directories
     outdir = args["outdir"]
-
-    data_ascent = xr.open_dataset(f"{filename}_ascent.nc")
-    data_descent = xr.open_dataset(f"{filename}_descent.nc")
-
-    ascent_color = "steelblue"
-    descent_color = "lightsteelblue"
+    check_outdir = os.path.exists(f"{outdir}/Trajectories")
+    if not check_outdir:
+        os.mkdir(f"{outdir}/Trajectories")
+    check_outdir = os.path.exists(f"{outdir}/Quantities")
+    if not check_outdir:
+        os.mkdir(f"{outdir}/Quantities")
+    check_outdir = os.path.exists(f"{outdir}/SkewT")
+    if not check_outdir:
+        os.mkdir(f"{outdir}/SkewT")
 
     snd = 0  # sounding
-    launch_time = np.datetime64(data_ascent.launch_time.values[0], "m")
+    launch_time = np.datetime64(data.launch_time.values[0], "m")
     timestamp = str(np.datetime64(launch_time, "m")).replace(":", "")
 
     props = dict(boxstyle="round", facecolor="white", alpha=0.8)
@@ -99,34 +111,25 @@ def main():
         alpha=0.5,
         linestyle="--",
     )
-    plt.scatter(
-        data_ascent.isel(sounding=snd).lon,
-        data_ascent.isel(sounding=snd).lat,
-        c=data_ascent.isel(sounding=snd).alt_WGS84.values,
+    traj = plt.scatter(
+        data.isel(sounding=snd).lon,
+        data.isel(sounding=snd).lat,
+        c=(data.isel(sounding=snd).alt_WGS84.values) / 1000,
         s=1,
         cmap="hot",
     )
-    plt.scatter(
-        data_descent.isel(sounding=snd).lon,
-        data_descent.isel(sounding=snd).lat,
-        c=data_descent.isel(sounding=snd).alt_WGS84.values,
-        s=1,
-        cmap="hot",
-    )
-    plt.scatter(
-        data_ascent.isel(sounding=snd).lon[0],
-        data_ascent.isel(sounding=snd).lat[0],
-        color="yellow",
-        marker="x",
-    )
-    lon_min = min(data_ascent.lon.min(), data_descent.lon.min())
-    lon_max = max(data_ascent.lon.max(), data_descent.lon.max())
+    plt.colorbar(traj, label="altitude (km)", pad=0.06)
+    lon_min = data.lon.min()
+    lon_max = data.lon.max()
     ax.set_xlim([lon_min - 0.3, lon_max + 0.3])
-    lat_min = min(data_ascent.lat.min(), data_descent.lat.min())
-    lat_max = max(data_ascent.lat.max(), data_descent.lat.max())
+    lat_min = data.lat.min()
+    lat_max = data.lat.max()
     ax.set_ylim([lat_min - 0.3, lat_max + 0.3])
-    ax.set_title(f"Maria S. Merian, launch time: {launch_time}", fontsize=13)
-    alt_max = round(data_ascent.isel(sounding=snd).alt_WGS84.values.max() / 1000, 1)
+    ax.set_title(
+        f"Radiosonde trajectory: launch time: {launch_time}, direction: {direction}",
+        fontsize=13,
+    )
+    alt_max = round(data.isel(sounding=snd).alt_WGS84.values.max() / 1000, 1)
     ax.text(
         0.02,
         0.07,
@@ -136,81 +139,46 @@ def main():
         verticalalignment="top",
         bbox=props,
     )
+    fig_track.savefig(
+        f"{outdir}/Trajectories/track_{timestamp}_{direction}.png", bbox_inches="tight"
+    )
 
-    # meaured quantites
+    # measured quantites
     fig_quantities, ax = plt.subplots(
         1, 6, sharey=True, tight_layout=True, figsize=(15, 5.5)
     )
 
     ax[0].plot(
-        data_ascent.isel(sounding=snd).ta,
-        data_ascent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=ascent_color,
-        label="ascent",
-    )
-    ax[0].plot(
-        data_descent.isel(sounding=snd).ta,
-        data_descent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=descent_color,
-        label="descent",
-    )
-    ax[2].plot(
-        data_ascent.isel(sounding=snd).rh * 100,
-        data_ascent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=ascent_color,
-    )
-    ax[2].plot(
-        data_descent.isel(sounding=snd).rh * 100,
-        data_descent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=descent_color,
+        data.isel(sounding=snd).ta,
+        data.isel(sounding=snd).alt_WGS84 / 1000,
+        color=quantities_color,
     )
     ax[1].plot(
-        data_ascent.isel(sounding=snd).dp,
-        data_ascent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=ascent_color,
+        data.isel(sounding=snd).dp,
+        data.isel(sounding=snd).alt_WGS84 / 1000,
+        color=quantities_color,
     )
-    ax[1].plot(
-        data_descent.isel(sounding=snd).dp,
-        data_descent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=descent_color,
-    )
-    ax[3].plot(
-        data_ascent.isel(sounding=snd).mr * 100,
-        data_ascent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=ascent_color,
+    ax[2].plot(
+        data.isel(sounding=snd).rh * 100,
+        data.isel(sounding=snd).alt_WGS84 / 1000,
+        color=quantities_color,
     )
     ax[3].plot(
-        data_descent.isel(sounding=snd).mr * 100,
-        data_descent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=descent_color,
+        data.isel(sounding=snd).mr * 100,
+        data.isel(sounding=snd).alt_WGS84 / 1000,
+        color=quantities_color,
     )
     ax[4].plot(
-        (data_ascent.isel(sounding=snd).wspd.values * units.knots).to(
+        (data.isel(sounding=snd).wspd.values * units.knots).to(
             units.meter / units.second
         ),
-        data_ascent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=ascent_color,
+        data.isel(sounding=snd).alt_WGS84 / 1000,
+        color=quantities_color,
     )
-    ax[4].plot(
-        (data_descent.isel(sounding=snd).wspd.values * units.knots).to(
-            units.meter / units.second
-        ),
-        data_descent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=descent_color,
-    )
-    ax[5].scatter(
-        data_ascent.isel(sounding=snd).wdir,
-        data_ascent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=ascent_color,
-        label="ascent",
-        s=0.05,
-    )
-    ax[5].scatter(
-        data_descent.isel(sounding=snd).wdir,
-        data_descent.isel(sounding=snd).alt_WGS84 / 1000,
-        color=descent_color,
-        label="descent",
-        s=0.05,
+    ax[5].plot(
+        data.isel(sounding=snd).wdir,
+        data.isel(sounding=snd).alt_WGS84 / 1000,
+        color=quantities_color,
     )
 
     ax[0].tick_params(labelsize=11)
@@ -223,18 +191,23 @@ def main():
     ax[0].set_xlabel("T (K)", fontsize=13)
     ax[2].set_xlabel("RH (%)", fontsize=13)
     ax[1].set_xlabel(r"$\tau$ (K)", fontsize=13)
-    ax[3].set_xlabel(r"Mixing ratio (%)", fontsize=13)
+    ax[3].set_xlabel(r"mixing ratio (%)", fontsize=13)
     ax[4].set_xlabel("wind speed (m/s)", fontsize=13)
     ax[5].set_xlabel("wind direction (degrees)", fontsize=13)
-    ax[0].legend(frameon=False, fontsize=11)
-    fig_quantities.suptitle(f"Maria S. Merian, launch time: {launch_time}", fontsize=14)
+    fig_quantities.suptitle(
+        f"Radiosonde observations: launch time: {launch_time}, direction: {direction}",
+        fontsize=14,
+    )
+    fig_quantities.savefig(
+        f"{outdir}/Quantities/radiosonde_data_{timestamp}_{direction}.pdf",
+        bbox_inches="tight",
+    )
 
     # SkewT
-    dirs = ["ascent", "descent"]
-
-    for direction in dirs:
+    if direction == "unknown":
+        print("No SkewT plot created since direction unknown.")
+    else:
         if direction == "ascent":
-            data = data_ascent
             p = data["p"].isel({"sounding": 0}).values * units.Pa
             T = data["ta"].isel({"sounding": 0}).values * units.K
             Td = data["dp"].isel({"sounding": 0}).values * units.K
@@ -244,7 +217,6 @@ def main():
             u, v = mpcalc.wind_components(wind_speed, wind_dir)
 
         elif direction == "descent":
-            data = data_descent
             p = np.flip(data["p"].isel({"sounding": 0}).values) * units.Pa
             T = np.flip(data["ta"].isel({"sounding": 0}).values) * units.K
             Td = np.flip(data["dp"].isel({"sounding": 0}).values) * units.K
@@ -409,7 +381,7 @@ def main():
 
         # Set title
         skew.ax.set_title(
-            f"Maria S. Merian, launch time: {launch_time}, sounding: {snd}, direction: {direction}",
+            f"Launch time: {launch_time}, sounding: {snd}, direction: {direction}",
             fontsize=12,
         )
         skew.ax.text(
@@ -436,33 +408,10 @@ def main():
             verticalalignment="top",
             bbox=props,
         )
-
-        if direction == "ascent":
-            fig_ascent = fig
-        elif direction == "descent":
-            fig_descent = fig
-
-    check_outdir = os.path.exists(f"{outdir}/Trajectories")
-    if not check_outdir:
-        os.mkdir(f"{outdir}/Trajectories")
-    check_outdir = os.path.exists(f"{outdir}/Quantities")
-    if not check_outdir:
-        os.mkdir(f"{outdir}/Quantities")
-    check_outdir = os.path.exists(f"{outdir}/SkewT")
-    if not check_outdir:
-        os.mkdir(f"{outdir}/SkewT")
-    fig_track.savefig(
-        f"{outdir}/Trajectories/track_{timestamp}.png", bbox_inches="tight"
-    )
-    fig_quantities.savefig(
-        f"{outdir}/Quantities/radiosonde_data_{timestamp}.pdf", bbox_inches="tight"
-    )
-    fig_descent.savefig(
-        f"{outdir}/SkewT/skewT_{timestamp}_descent.png", bbox_inches="tight"
-    )
-    fig_ascent.savefig(
-        f"{outdir}/SkewT/skewT_{timestamp}_ascent.png", bbox_inches="tight"
-    )
+        fig_skewt = fig
+        fig_skewt.savefig(
+            f"{outdir}/SkewT/skewT_{timestamp}_{direction}.png", bbox_inches="tight"
+        )
 
 
 if __name__ == "__main__":
