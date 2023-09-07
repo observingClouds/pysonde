@@ -217,7 +217,7 @@ def get_sounding_metadata(file, keys):
         for var in keys:
             try:
                 sounding_meta_dict[var] = item.attributes[var].value
-            except (KeyError):
+            except KeyError:
                 warnings.warn(
                     "Attribute {} could not found and is assumed to be RS41-SGP".format(
                         var

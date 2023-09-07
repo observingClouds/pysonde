@@ -17,7 +17,6 @@ from .readers.readers import pysondeL1
 
 
 def prepare_data_for_interpolation(ds, uni, variables, reader=pysondeL1):
-
     u, v = mh.get_wind_components(ds.wdir, ds.wspd)
     ds["u"] = xr.DataArray(u.data, dims=["level"])
     ds["v"] = xr.DataArray(v.data, dims=["level"])
@@ -74,7 +73,7 @@ def prepare_data_for_interpolation(ds, uni, variables, reader=pysondeL1):
         if var not in ds_new.data_vars and var not in ds_new.coords:
             try:
                 ds_new[var] = ds[var]
-            except (NameError):
+            except NameError:
                 logging.warning(f"Variable {var} not found.")
                 pass
 
@@ -92,7 +91,6 @@ def prepare_data_for_interpolation(ds, uni, variables, reader=pysondeL1):
 
 
 def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
-
     if method == "linear":
         # Druck logarithmisch interpolieren
 
@@ -177,7 +175,6 @@ def interpolation(ds_new, method, interpolation_grid, sounding, variables, cfg):
 
 
 def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
-
     dims_2d = ["sounding", "alt"]
     dims_1d = ["alt"]
     ureg = ds["lat"].pint.units._REGISTRY
@@ -288,7 +285,6 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
 
 
 def count_number_of_measurement_within_bin(ds_interp, ds_new, cfg, interpolation_grid):
-
     interpolation_bins = np.arange(
         cfg.level2.setup.interpolation_grid_min
         - cfg.level2.setup.interpolation_grid_inc / 2,
@@ -351,7 +347,6 @@ def count_number_of_measurement_within_bin(ds_interp, ds_new, cfg, interpolation
 
 
 def finalize_attrs(ds_interp, ds, cfg, file, variables):
-
     import pandas as pd
     from netCDF4 import num2date
 

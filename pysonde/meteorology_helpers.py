@@ -341,7 +341,6 @@ def pressure_interpolation(
     )
 
     for i in range(range_of_alt_min, range_of_alt_max):
-
         target_h = new_alt[i]
 
         lower_idx = np.nanmax(np.where(altitudes <= target_h))
