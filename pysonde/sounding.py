@@ -81,7 +81,7 @@ class Sounding:
     def convert_sounding_df2ds(self):
         unit_dict = {}
         for var in self.profile.columns:
-            if type(self.profile[var].dtype) == pint_pandas.pint_array.PintType:
+            if type(self.profile[var].dtype) is pint_pandas.pint_array.PintType:
                 unit_dict[var] = self.profile[var].pint.units
                 self.profile[var] = self.profile[var].pint.magnitude
 

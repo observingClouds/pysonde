@@ -154,7 +154,6 @@ def main(args=None):
                 snd.create_dataset(cfg)
                 snd.export(args["output"], cfg)
         elif isinstance(reader, readers.readers.pysondeL1):
-
             cfg = h.replace_placeholders_cfg_level2(cfg)
 
             if len(sounding.profile.sounding) != 1:

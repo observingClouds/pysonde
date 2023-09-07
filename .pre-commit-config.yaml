@@ -1,40 +1,39 @@
 # See https://pre-commit.com/ for usage and config
 repos:
-- repo: local
+- repo: https://github.com/PyCQA/isort
+  rev: 5.12.0
   hooks:
   - id: isort
     name: isort
-    stages: [commit]
-    language: system
     entry: isort
     types: [python]
-
+- repo: https://github.com/psf/black
+  rev: 23.3.0
+  hooks:
   - id: black
     name: black
-    stages: [commit]
-    language: system
     entry: black
     types: [python]
-
+- repo: https://github.com/PyCQA/flake8
+  rev: 6.0.0
+  hooks:
   - id: flake8
     name: flake8
-    stages: [commit]
-    language: system
     entry: flake8
     types: [python]
     exclude: setup.py
-
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.1.1
+  hooks:
   - id: mypy
     name: mypy
-    stages: [commit]
-    language: system
     entry: mypy
     types: [python]
     require_serial: true
-
+- repo: local
+  hooks:
   - id: pytest
     name: pytest
-    stages: [commit]
     language: system
     entry: pytest
     types: [python]
@@ -42,8 +41,8 @@ repos:
 
   - id: pytest-cov
     name: pytest
-    stages: [push]
     language: system
+    stages: [push]
     entry: pytest --cov --cov-fail-under=50
     types: [python]
     pass_filenames: false
