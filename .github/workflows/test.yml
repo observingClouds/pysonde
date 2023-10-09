@@ -15,7 +15,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.9
+          python-version: 3.11
 
       - name: Install dependencies with pip
         run: |
@@ -26,3 +26,23 @@ jobs:
       - run: flake8
       - run: mypy
       - run: pytest --cov --cov-fail-under=50
+  test_plotting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.11
+      - name: Install dependencies with pip
+        run: |
+          python -m pip install -e .[dev]
+      - name: Create plots
+        run: |
+          python scripts/plot_radiosonde_data.py -i examples/level1/EUREC4A_BCO_Vaisala-RS_L1-ascent_20200126T2244_v3.0.0.nc -o artifacts
+      - name: Upload plots
+        uses: actions/upload-artifact@v3
+        with:
+          name: figures
+          path: |
+            artifacts
