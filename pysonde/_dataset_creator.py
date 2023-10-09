@@ -66,7 +66,7 @@ def set_global_attrs(cfg, ds):
 def set_coords(cfg, ds):
     if "coordinates" in cfg.keys():
         for coord, params in cfg.coordinates.items():
-            if type(params["dimension"]) == int:
+            if type(params["dimension"]) is int:
                 ds = ds.assign_coords(
                     {coord: range(params["dimension"])}
                 )  # write temporary values to coord
