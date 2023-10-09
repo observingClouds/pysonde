@@ -120,9 +120,9 @@ def main():
     filename = args["inputfile"]
 
     data = xr.open_dataset(filename)
-    data = data.metpy.quantify()
+    data = data.pint.quantify(unit_registry=units)
     for coord_name in data.coords:
-        data.coords[coord_name] = data.coords[coord_name].metpy.quantify()
+        data.coords[coord_name] = data.coords[coord_name].pint.quantify()
     if "ascent" in filename:
         direction = "ascent"
     elif "descent" in filename:
