@@ -417,21 +417,29 @@ def main():
             0.02,
             0.16,
             "LCL: "
-            + str(round(lcl_pressure.to("hPa"), 1)).replace("hectopascal", "hPa")
+            + str(round(float(lcl_pressure.to("hPa").magnitude), 1))
+            + " hPa"
             + ", "
-            + str(round(lcl_temperature.to("degC"), 1)).replace("degree_Celsius", "˚C")
+            + str(round(float(lcl_temperature.to("degC").magnitude), 1))
+            + "˚C"
             + "\nLFC: "
-            + str(round(lfcp.to("hPa"), 1)).replace("hectopascal", "hPa")
+            + str(round(float(lfcp.to("hPa").magnitude), 1))
+            + " hPa"
             + ", "
-            + str(round(lfct.to("degC"), 1)).replace("degree_Celsius", "˚C")
+            + str(round(float(lfct.to("degC").magnitude), 1))
+            + "˚C"
             + "\nEL: "
-            + str(round(elp.to("hPa"), 1)).replace("hectopascal", "hPa")
+            + str(round(float(elp.to("hPa").magnitude), 1))
+            + " hPa"
             + ", "
-            + str(round(elt.to("degC"), 1)).replace("degree_Celsius", "˚C")
+            + str(round(float(elt.to("degC").magnitude), 1))
+            + "˚C"
             + "\nCAPE: "
-            + str(round(cape, 1)).replace("joule / kilogram", "J/kg")
+            + str(round(float(cape.magnitude), 1))
+            + " J/kg"
             + "\nCIN: "
-            + str(round(cin, 1)).replace("joule / kilogram", "J/kg"),
+            + str(round(float(cin.magnitude), 1))
+            + " J/kg",
             transform=skew.ax.transAxes,
             fontsize=11,
             verticalalignment="top",
