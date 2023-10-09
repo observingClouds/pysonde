@@ -18,7 +18,7 @@ This script produces 3 plots:
 """
 
 import argparse
-import os.path
+import os
 from decimal import ROUND_HALF_UP, Decimal
 
 import cartopy.crs as ccrs
@@ -129,13 +129,13 @@ def main():
     outdir = args["outdir"]
     check_outdir = os.path.exists(f"{outdir}/Trajectories")
     if not check_outdir:
-        os.mkdir(f"{outdir}/Trajectories")
+        os.makedirs(f"{outdir}/Trajectories")
     check_outdir = os.path.exists(f"{outdir}/Quantities")
     if not check_outdir:
-        os.mkdir(f"{outdir}/Quantities")
+        os.makedirs(f"{outdir}/Quantities")
     check_outdir = os.path.exists(f"{outdir}/SkewT")
     if not check_outdir:
-        os.mkdir(f"{outdir}/SkewT")
+        os.makedirs(f"{outdir}/SkewT")
 
     snd = 0  # sounding
     launch_time = np.datetime64(data.launch_time.values[0], "m")
