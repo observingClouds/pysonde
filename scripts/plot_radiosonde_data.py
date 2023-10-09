@@ -43,6 +43,13 @@ def get_args():
     )
 
     parser.add_argument(
+        "--altitude",
+        metavar="ALTITUDE_VARIABLE",
+        help="Altitude variable. Default: alt (geopotential height). Alternative alt_WGS84 (height above reference ellipsoid). Variable names might change depending on the configuration given in config/level1.yaml.",
+        default="alt",
+    )
+
+    parser.add_argument(
         "-o",
         "--outdir",
         metavar="/some/example/path/",
@@ -144,7 +151,10 @@ def main():
     lats = data.isel(sounding=snd).lat.pint.to("degree_north")
     lons = data.isel(sounding=snd).lon.pint.to("degree_east")
     alts = (
-        (data.isel(sounding=snd).alt_WGS84).pint.to(units.km).pint.dequantify().values
+        (data.isel(sounding=snd)[args["altitude"]])
+        .pint.to(units.km)
+        .pint.dequantify()
+        .values
     )
 
     props = dict(boxstyle="round", facecolor="white", alpha=0.8)
