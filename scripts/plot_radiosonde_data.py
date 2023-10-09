@@ -160,8 +160,8 @@ def main():
     props = dict(boxstyle="round", facecolor="white", alpha=0.8)
 
     # Trajectory of the radiosonde
-    fig_track, ax = plt.subplots(figsize=(15, 5))
-    ax = plt.subplot(projection=ccrs.PlateCarree())
+    fig_track = plt.figure(figsize=(15, 5))
+    ax = fig_track.add_subplot(projection=ccrs.PlateCarree())
     ax.coastlines(color="black")
     ax.stock_img()
     ax.gridlines(
@@ -172,7 +172,7 @@ def main():
         alpha=0.5,
         linestyle="--",
     )
-    traj = plt.scatter(
+    traj = ax.scatter(
         lons,
         lats,
         c=alts,
