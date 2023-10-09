@@ -2,6 +2,11 @@
 CHANGELOG
 =========
 
+unreleased
+------------------
+
+* Add scripts to plot radiosonde data incl. trajectory, skewT and profiles of measured quantities (:pr:`21`) `Laura Köhler`_.
+
 0.0.4 (2022-11-02)
 ------------------
 
