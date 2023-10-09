@@ -5,8 +5,8 @@ metpy
 netCDF4
 numpy
 omegaconf
-pandas<2.1 #https://github.com/hgrecco/pint-pandas/pull/195
-Pint<=0.17
+pandas
+Pint
 Pint-Pandas
 pint-xarray
 PyYAML
