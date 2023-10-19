@@ -6,15 +6,15 @@
     "upload_type": "software",
     "creators": [
         {
-            "name": "Schulz, Hauke",
+            "name": "Schulz, Hauke"
         }
     ],
     "contributers": [
         {
-            "name": "Stolla, Katharina",
+            "name": "Stolla, Katharina"
         },
         {
-            "name": "Köhler, Laura",
-        },
-    ],
+            "name": "Köhler, Laura"
+        }
+    ]
 }
