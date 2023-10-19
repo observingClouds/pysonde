@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Schulz"
+  given-names: "Hauke"
+title: "pysonde: Postprocessing of Atmospheric Soundings"
+abstract: "Python tool to postprocess atmospheric soundings."
+license: GPL-3.0
+doi: 10.5281/zenodo.10023462
+repository-code: "https://github.com/observingClouds/pysonde"
