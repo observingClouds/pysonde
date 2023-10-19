@@ -5,7 +5,13 @@ CHANGELOG
 unreleased
 ------------------
 
+
+0.0.5 (2023-10-19)
+------------------
+
 * Add scripts to plot radiosonde data incl. trajectory, skewT and profiles of measured quantities (:pr:`21`) `Laura Köhler`_.
+* Update pre-commit linters with slight code adjustments `Hauke Schulz`_.
+* bump up python to 3.11 for CI tests
 
 0.0.4 (2022-11-02)
 ------------------
