@@ -1,0 +1,18 @@
+{
+    "access_right": "open",
+    "license": "GPL-3.0",
+    "title": "pysonde: Postprocessing of Atmospheric Soundings",
+    "description": "A Python package for converting and postprocessing atmospheric sounding data.",
+    "upload_type": "software",
+    "creators": [
+        {
+            "name": "Schulz, Hauke"
+        },
+        {
+            "name": "Stolla, Katharina"
+        },
+        {
+            "name": "Köhler, Laura"
+        }
+    ]
+}
