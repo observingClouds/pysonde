@@ -98,6 +98,10 @@ def load_reader(filename):
         from .readers.readers import MW41
 
         reader = MW41
+    elif ending == ".cor":
+        from .readers.readers import METEOMODEM
+
+        reader = METEOMODEM
     elif ending == ".nc":
         from .readers.readers import pysondeL1
 
