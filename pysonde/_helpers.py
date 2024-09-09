@@ -236,7 +236,9 @@ def remove_nontype_keys(dict, allowed_type=type("str")):
     return {k: v for (k, v) in dict.items() if isinstance(v, allowed_type)}
 
 
-def remove_missing_cfg(cfg):
+
+def remove_missing_cfg(cfg, RS_type = 'mwx'):
+
     """
     Remove config keys that are missing
     """
@@ -247,6 +249,8 @@ def remove_missing_cfg(cfg):
                 logging.warning(f"key {k} is missing and skipped")
             else:
                 return_cfg[k] = cfg[k]
+            #need to add a if loop that check is the RS_type is a cor, if yes it should use a cfg with level0_cor instead of level0_mwx.yml
+            #to have the correct global attributes
         except Exception as e:
             if 'Interpolation key' in str(e):
                 #logging.warning(f"Interpolation key {k} not found, setting to 'no info'")

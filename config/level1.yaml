@@ -3,9 +3,9 @@ global_attrs:
     location: ${main.location}
     location_coord: "{location_coordinates}"
     campaign_id: ${main.campaign_id}
-    platform: ${level0_cor.platform}
-    instrument: ${level0_cor.instrument}
-    instrument_id: ${level0_cor.instrument_id}
+    platform: ${level0_mwx.platform}
+    instrument: ${level0_mwx.instrument}
+    instrument_id: ${level0_mwx.instrument_id}
     time_of_launch_HHmmss: "{time_launch}"
     date_YYYYMMDD: "{day_launch}"
     date_YYYYMMDDTHHMM: "{date_launch}"

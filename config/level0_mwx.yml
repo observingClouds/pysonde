@@ -1,7 +1,5 @@
 sync_sounding_items:
-    #- SoundingIdPk
     - RadioRxTimePk
-    #- DataSrvTime
     - Pressure
     - Temperature
     - Humidity
@@ -11,7 +9,6 @@ sync_sounding_items:
     - WindEast
     - Height
     - PtuStatus
-    #- WindInterpolated
     - Latitude
     - Longitude
     - North

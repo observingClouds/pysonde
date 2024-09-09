@@ -26,11 +26,11 @@ class Level0_mwx:
     def __init__(self, cfg):
         """Configure reader"""
         # Configure, which values need to be read and how they are named
-        self.sync_sounding_values = cfg.level0.get("sync_sounding_items", None)
-        self.radiosondes_values = cfg.level0.get("radiosondes_sounding_items", None)
+        self.sync_sounding_values = cfg.level0_mwx.get("sync_sounding_items", None)
+        self.radiosondes_values = cfg.level0_mwx.get("radiosondes_sounding_items", None)
         # self.radiosondes_values = cfg.level0.radiosondes_sounding_items
-        self.variable_name_mapping = cfg.level0.dictionary_input
-        self.units = cfg.level0.input_units
+        self.variable_name_mapping = cfg.level0_mwx.dictionary_input
+        self.units = cfg.level0_mwx.input_units
         self.unitregistry = self._create_unitregistry()
 
     def _create_unitregistry(self):

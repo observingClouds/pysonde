@@ -279,7 +279,7 @@ class Sounding:
                 ds[k].encoding["dtype"] = coord_dtype
         return ds, unset_coords
 
-    def create_dataset(self, config, level=1):
+    def create_dataset(self, config, level=1, RS_type = 'mwx'):
         merged_conf = self.collect_config(config, level)
         ds = dc.create_dataset(merged_conf)
 
@@ -336,8 +336,13 @@ class Sounding:
 
         logging.debug("Add global attributes")
 
+        #here the attributes change depending wether it is a cor or a mwx file
         if "global_attrs" in merged_conf.keys():
-            _cfg = h.remove_missing_cfg(merged_conf["global_attrs"])
+            if RS_type =='cor':
+                _cfg = h.remove_missing_cfg(merged_conf["global_attrs"], 'cor')
+            else:
+                _cfg = h.remove_missing_cfg(merged_conf["global_attrs"])
+
             ds.attrs = _cfg
 
 
@@ -358,17 +363,26 @@ class Sounding:
             self.profile.squeeze().flight_time.values[first_idx_w_time]
         )
 
-    def export(self, output_fmt, cfg):
+    def export(self, output_fmt, cfg, RS_type = 'mwx'):
         """
         Saves sounding to disk
         """
-        output = output_fmt.format(
-            platform=cfg.main.get("platform"),
-            campaign=cfg.main.get("campaign"),
-            campaign_id=cfg.main.get("campaign_id"),
-            direction=self.meta_data["sounding_direction"],
-            version=cfg.main.get("data_version"),
-        )
+        if RS_type == 'cor':
+            output = output_fmt.format(
+                platform=cfg.level0_cor.get("platform"),
+                campaign=cfg.main.get("campaign"),
+                campaign_id=cfg.main.get("campaign_id"),
+                direction=self.meta_data["sounding_direction"],
+                version=cfg.main.get("data_version"),
+            )
+        else:
+            output = output_fmt.format(
+                platform=cfg.level0_mwx.get("platform"),
+                campaign=cfg.main.get("campaign"),
+                campaign_id=cfg.main.get("campaign_id"),
+                direction=self.meta_data["sounding_direction"],
+                version=cfg.main.get("data_version"),
+            )
         output = self.meta_data["launch_time_dt"].strftime(output)
         directory = os.path.dirname(output)
         Path(directory).mkdir(parents=True, exist_ok=True)
