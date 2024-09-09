@@ -1,0 +1,42 @@
+sync_sounding_items:
+    - Time
+    - Press
+    - T
+    - U
+    - WindD
+    - WindF
+    - VN
+    - VE
+    - Altitude
+    - Latitude
+    - Longitude
+    #- DP
+    - Ascent
+    #- Flag
+
+dictionary_input: # variable_name_in_file: variable_name_in_software
+    "Press" : "pressure"
+    "T" : "temperature"
+    "U" : "humidity"
+    "WindD" : "wind_direction"
+    "WindF" : "wind_speed"
+    "VN" : "v"
+    "VE" : "u"
+    "Altitude" : "height"
+    "Latitude" : "latitude"
+    "Longitude" : "longitude"
+    "DP" : "dew_point"
+    "Ascent": "ascent_rate"
+    "Flag": "flag"
+input_units:  # data units in radiosonde files (cor)
+    "pressure" : "hPa"
+    "temperature" : "degree_Celsius"
+    "humidity" : "percent"
+    "wind_direction" : "degree"
+    "wind_speed" : "m/s"
+    "v" : "m/s"
+    "u" : "m/s"
+
+platform: SAL
+instrument: Radiosonde Meteomodem
+instrument_id: Meteomodem
