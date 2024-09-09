@@ -80,12 +80,16 @@ class Sounding:
 
     def convert_sounding_df2ds(self):
         unit_dict = {}
-        for var in self.profile.columns:
-            if type(self.profile[var].dtype) is pint_pandas.pint_array.PintType:
-                unit_dict[var] = self.profile[var].pint.units
-                self.profile[var] = self.profile[var].pint.magnitude
+        profile_copy = self.profile.copy()
+    
+        for var in profile_copy.columns:
+            if isinstance(profile_copy[var].dtype, pint_pandas.pint_array.PintType):
+                unit_dict[var] = profile_copy[var].pint.units
+                profile_copy[var] = profile_copy[var].pint.magnitude
 
-        self.profile = xr.Dataset.from_dataframe(self.profile)
+        # Convert to xarray Dataset
+        self.profile = xr.Dataset.from_dataframe(profile_copy)
+
 
         if self.unitregistry is not None:
             self.unitregistry.force_ndarray_like = True
@@ -161,15 +165,20 @@ class Sounding:
         self.meta_data["sounding"] = id
 
     def get_sonde_type(self):
-        """Get WMO sonde type"""
-        if self.meta_data["SondeTypeName"] == "RS41-SGP":
-            self.meta_data["sonde_type"] = "123"
-        else:
-            raise SondeTypeNotImplemented(
-                "SondeTypeName {} is not implemented".format(
-                    self.meta_data["SondeTypeName"]
+    # Check if "SondeTypeName" exists in meta_data
+        if "SondeTypeName" in self.meta_data:
+            if self.meta_data["SondeTypeName"] == "RS41-SGP":
+                self.meta_data["sonde_type"] = "123"
+            else:
+                raise SondeTypeNotImplemented(
+                    "SondeTypeName {} is not implemented".format(
+                        self.meta_data["SondeTypeName"]
+                    )
                 )
-            )
+        else:
+        # If "SondeTypeName" is not present, set sonde_type to the meteomodem ones (as the .cor files don't have a SondeTypeName)
+            self.meta_data["sonde_type"] = "163"
+
 
     def calculate_additional_variables(self, config):
         """Calculation of additional variables"""
@@ -326,9 +335,11 @@ class Sounding:
         merged_conf = h.replace_placeholders_cfg(self, merged_conf)
 
         logging.debug("Add global attributes")
+
         if "global_attrs" in merged_conf.keys():
             _cfg = h.remove_missing_cfg(merged_conf["global_attrs"])
             ds.attrs = _cfg
+
 
         self.dataset = ds
 

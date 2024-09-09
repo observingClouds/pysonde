@@ -98,6 +98,12 @@ def load_reader(filename):
         from .readers.readers import MW41
 
         reader = MW41
+
+    elif ending == ".cor":
+        from .readers.readers import METEOMODEM
+
+        reader = METEOMODEM
+    
     elif ending == ".nc":
         from .readers.readers import pysondeL1
 
@@ -128,6 +134,7 @@ def main(args=None):
 
     logging.debug("Load reader. All files need to be of same type!")
     # Load correct reader class
+
     reader_class = load_reader(input_files[0])
     # Configure reader according to config file
     reader = reader_class(cfg)
@@ -153,6 +160,23 @@ def main(args=None):
                 snd.convert_sounding_df2ds()
                 snd.create_dataset(cfg)
                 snd.export(args["output"], cfg)
+
+        elif isinstance(reader, readers.readers.METEOMODEM):
+            sounding_asc, sounding_dsc = sounding.split_by_direction()
+            for snd in [sounding_asc, sounding_dsc]:
+                if len(snd.profile) < 2:
+                    logging.warning(
+                        "Sounding ({}) does not contain data. "
+                        "Skip sounding-direction of {}".format(
+                            snd.meta_data["sounding_direction"], file
+                        )
+                    )
+                    continue
+                snd.calculate_additional_variables(cfg)
+                snd.convert_sounding_df2ds()
+                snd.create_dataset(cfg)
+                snd.export(args["output"], cfg)
+
         elif isinstance(reader, readers.readers.pysondeL1):
             cfg = h.replace_placeholders_cfg_level2(cfg)
 

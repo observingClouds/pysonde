@@ -113,7 +113,7 @@ def replace_placeholders_cfg(self, cfg, subset="global_attrs"):
         )
     if "source" in cfg[subset].keys():
         source = self.source
-        cfg[subset]["source"] = cfg[subset]["source"].format(input_file=source)
+        #cfg[subset]["source"] = cfg[subset]["source"]#.format(input_file=source)
 
     return cfg
 
@@ -242,11 +242,19 @@ def remove_missing_cfg(cfg):
     """
     return_cfg = {}
     for k in cfg.keys():
-        if OmegaConf.is_missing(cfg, k):
-            logging.warning(f"key {k} is missing and skipped")
-            pass
-        else:
-            return_cfg[k] = cfg[k]
+        try:
+            if OmegaConf.is_missing(cfg, k):
+                logging.warning(f"key {k} is missing and skipped")
+            else:
+                return_cfg[k] = cfg[k]
+        except Exception as e:
+            if 'Interpolation key' in str(e):
+                #logging.warning(f"Interpolation key {k} not found, setting to 'no info'")
+                return_cfg[k] = 'no info'
+            else:
+                # Re-raise the exception if it's not an InterpolationKeyError
+                raise
+    
     return OmegaConf.create(return_cfg)
 
 

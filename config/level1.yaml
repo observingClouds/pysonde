@@ -3,9 +3,9 @@ global_attrs:
     location: ${main.location}
     location_coord: "{location_coordinates}"
     campaign_id: ${main.campaign_id}
-    platform: ${main.platform}
-    instrument: "Radiosonde RS41-SGP by Vaisala"
-    instrument_id: "Vaisala-RS"
+    platform: ${level0_cor.platform}
+    instrument: ${level0_cor.instrument}
+    instrument_id: ${level0_cor.instrument_id}
     time_of_launch_HHmmss: "{time_launch}"
     date_YYYYMMDD: "{day_launch}"
     date_YYYYMMDDTHHMM: "{date_launch}"

@@ -9,7 +9,6 @@ from functools import partial
 import numpy as np
 import pandas as pd  # noqa: F401
 import pint
-import pint_pandas as pp
 import pint_xarray  # noqa: F401
 import xarray as xr
 from metpy.units import units
@@ -20,17 +19,15 @@ import reader_helpers as rh  # noqa: E402
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import sounding as snd  # noqa: E402
 
+#for unit conversion
+ureg = pint.UnitRegistry()
 
-class MW41:
-    """
-    Reader for MW41 mwx files
-    """
-
+class Level0_mwx:
     def __init__(self, cfg):
         """Configure reader"""
         # Configure, which values need to be read and how they are named
-        self.sync_sounding_values = cfg.level0.sync_sounding_items
-        self.radiosondes_values = cfg.level0.radiosondes_sounding_items
+        self.sync_sounding_values = cfg.level0.get("sync_sounding_items", None)
+        self.radiosondes_values = cfg.level0.get("radiosondes_sounding_items", None)
         # self.radiosondes_values = cfg.level0.radiosondes_sounding_items
         self.variable_name_mapping = cfg.level0.dictionary_input
         self.units = cfg.level0.input_units
@@ -41,6 +38,37 @@ class MW41:
         ureg.define("fraction = [] = frac")
         ureg.define("percent = 1e-2 frac = pct")
         return ureg
+
+    def read(self, mwx_file):
+        raise NotImplementedError("This method needs to be implemented in the subclass")
+
+
+class Level0_cor:
+    def __init__(self, cfg):
+        """Configure reader"""
+        # Configure, which values need to be read and how they are named
+        self.sync_sounding_values = cfg.level0_cor.get("sync_sounding_items", None)
+        self.radiosondes_values = cfg.level0_cor.get("radiosondes_sounding_items", None)
+        # self.radiosondes_values = cfg.level0.radiosondes_sounding_items
+        self.variable_name_mapping = cfg.level0_cor.dictionary_input
+        self.units = cfg.level0_cor.input_units
+        self.unitregistry = self._create_unitregistry()
+
+    def _create_unitregistry(self):
+        ureg = pint.UnitRegistry()
+        ureg.define("fraction = [] = frac")
+        ureg.define("percent = 1e-2 frac = pct")
+        return ureg
+
+    def read(self, mwx_file):
+        raise NotImplementedError("This method needs to be implemented in the subclass")
+    
+
+
+class MW41(Level0_mwx):
+    """
+    Reader for MW41 mwx files
+    """
 
     def read(self, mwx_file):
         def _get_flighttime(radio_time, start_time, launch_time):
@@ -93,17 +121,7 @@ class MW41:
         )
 
         # Attach units where provided
-        pp.PintType.ureg = self.unitregistry
-        PA_ = pp.PintArray
-
-        pd_snd_w_units = pd.DataFrame()
-        for var in pd_snd.columns:
-            if var in self.units.keys():
-                pd_snd_w_units[var] = PA_(pd_snd[var].values, dtype=self.units[var])
-            else:
-                # no units found
-                pd_snd_w_units[var] = pd_snd[var].values
-        pd_snd = pd_snd_w_units
+        pd_snd = rh.attach_units(pd_snd, self.units, self.unitregistry)
 
         # Create flight time
         f_flighttime = partial(
@@ -120,6 +138,126 @@ class MW41:
         sounding.meta_data["station_altitude"] = station_altitude
         sounding.unitregistry = self.unitregistry
         sounding.source = mwx_file
+
+        return sounding
+
+
+class METEOMODEM(Level0_cor):
+    """
+    Reader for level 0 data from Meteomodem sondes
+    """
+
+    def check_TU_sensor(self, snd):
+        """
+        Meteomodem soundings have occasionally
+        a mismatch between T, Td and RH
+        """
+        idx = np.where(
+            snd.Temperature == snd.Dewpoint
+        )  # might need conversion to kelvin
+        _snd = snd.iloc[idx]
+        idx_pd = _snd.index
+        if np.any(
+            snd.loc[idx_pd, "Humidity"] != 100
+        ):  # might need conversion to percent
+            logging.warning("Humidity mismatch, setting Td to nan")
+            snd.loc[idx_pd, "Dewpoint"] = np.nan
+        return snd
+
+    def read(self, cor_file, bufr_file=None, round_like_bufr=False):
+
+        #keep only certain columns to match with the mwx file, these are based on the level0_cor.yml file
+        #Ideally, should combine both level0_mwx and level0_cor files together
+        columns_to_keep = self.sync_sounding_values
+        pd_snd = pd.read_csv(cor_file, delimiter="\t", usecols=columns_to_keep)
+        pd_snd = rh.rename_variables(pd_snd, self.variable_name_mapping)
+
+        def _get_date_information_from_filename(cor_file):
+
+            # Extract the basename from the file path
+            basename = os.path.basename(cor_file)
+            date_str = basename[2:12]  # '2024081600' from 'SA2024081600_1.cor' for example
+            
+            # Convert the date string to a datetime object
+            date_dt = dt.datetime.strptime(date_str, "%Y%m%d%H").date()
+            
+            # Get the first time hour from the provided pd_snd (in seconds, converted to hours)
+            first_time_hour = np.round(pd_snd.Time[0] / (60 * 60))
+            
+            # Adjust the date based on the first time hour and the time in the filename
+            if (first_time_hour > 12) and (dt.datetime.strptime(date_str, "%Y%m%d%H").hour == 0):
+                # If the first time hour is after noon and the file's hour is midnight, subtract a day
+                date_dt = date_dt - dt.timedelta(days=1)
+            else:
+                # No changes to the date
+                date_dt = date_dt
+            
+            return date_dt
+
+
+        def _get_flighttime(seconds, date_dt):
+            return dt.datetime.combine(
+                date_dt, dt.time(hour=0, minute=0)
+            ) + dt.timedelta(seconds=seconds)
+
+        date_dt = _get_date_information_from_filename(cor_file)
+        pd_snd["flight_time"] = pd_snd.Time.apply(_get_flighttime, date_dt=date_dt)
+        # Rename variables
+        #pd_snd = rh.rename_variables(pd_snd, self.variable_name_mapping)
+
+        # Convert radians to degree
+        pd_snd["latitude"] = np.rad2deg(pd_snd["latitude"])
+        pd_snd["longitude"] = np.rad2deg(pd_snd["longitude"])
+
+        # Attach units where provided
+        pd_snd = rh.attach_units(pd_snd, self.units, self.unitregistry)
+
+
+        if round_like_bufr:
+            logging.debug("Data is rounded similar to BUFR message output")
+            pd_snd = pd_snd.round(
+                decimals={
+                    "humidity": 2,
+                    "wind_direction": 0,
+                    "temperature": 2,
+                    "latitude": 5,
+                    "longitude": 5,
+                    "wind_speed": 1,
+                    "pressure": 2,
+                    "height": 1,
+                }
+            )
+
+        # Quality check
+        #pd_snd = self.check_TU_sensor(pd_snd)
+
+        pd_snd["Dropping"] = np.where(pd_snd["ascent_rate"].rolling(10).sum() < 0, 1, 0)
+
+        launch_time = pd_snd.flight_time.values[0]
+
+        #remove some variables such that the pd_snd matches the mwx ones:
+        columns_to_remove = ['ascent_rate']
+        pd_snd = pd_snd.drop(columns=[col for col in columns_to_remove if col in pd_snd.columns])
+
+        #convert kelvin to celsius
+        ureg = pint.UnitRegistry()
+
+        # Attach units to the temperature column and convert to Kelvin
+        pd_snd['temperature'] = pd_snd['temperature'].pint.to('K')
+
+        # Write to class
+        sounding = snd.Sounding()
+        sounding.profile = pd_snd
+        #sounding.meta_data = sounding_meta_dict
+        # sounding.meta_data = sounding_meta_dict
+        sounding.meta_data["launch_time"] = launch_time
+        # sounding.meta_data["begin_time"] = begin_time_dt
+        # sounding.meta_data["station_altitude"] = station_altitude
+        sounding.unitregistry = self.unitregistry
+        sounding.source = cor_file
+        if bufr_file is not None:
+            sounding.source += ", " + bufr_file
+
         return sounding
 
 

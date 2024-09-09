@@ -10,6 +10,7 @@ from typing import Optional, Type, Union
 from xml.dom import minidom
 
 import numpy as np
+import pint_pandas as pp
 import pandas as pd
 import xarray as xr
 
@@ -194,10 +195,10 @@ def get_sounding_profile(file, keys):
         warnings.warn("Key {} not found.".format(var), VariableNotFoundInSounding)
     pd_snd = pd.DataFrame.from_dict(sounding_dict, orient="index")
     types = {c: float for c in pd_snd.columns}
-    types["SoundingIdPk"] = str
-    types["DataSrvTime"] = str
-    types["PtuStatus"] = int
-    types["WindInterpolated"] = bool
+    #types["SoundingIdPk"] = str
+    #types["DataSrvTime"] = str
+    #types["WindInterpolated"] = bool
+    ##types["PtuStatus"] = int
     types["Dropping"] = int
     pd_snd = pd_snd.astype(types)
 
@@ -263,3 +264,18 @@ def rename_metadata(meta_dict, variable_dict):
         else:
             updated_dict[var] = meta_dict[var]
     return updated_dict
+
+
+def attach_units(pd_snd, units, unitregistry):
+    pp.PintType.ureg = unitregistry
+    PA_ = pp.PintArray
+
+    pd_snd_w_units = pd.DataFrame()
+    for var in pd_snd.columns:
+        if var in units.keys():
+            pd_snd_w_units[var] = PA_(pd_snd[var].values, dtype=units[var])
+        else:
+            # no units found
+            pd_snd_w_units[var] = pd_snd[var].values
+    pd_snd = pd_snd_w_units
+    return pd_snd

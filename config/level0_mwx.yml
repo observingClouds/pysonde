@@ -1,7 +1,7 @@
 sync_sounding_items:
-    - SoundingIdPk
+    #- SoundingIdPk
     - RadioRxTimePk
-    - DataSrvTime
+    #- DataSrvTime
     - Pressure
     - Temperature
     - Humidity
@@ -11,7 +11,7 @@ sync_sounding_items:
     - WindEast
     - Height
     - PtuStatus
-    - WindInterpolated
+    #- WindInterpolated
     - Latitude
     - Longitude
     - North
@@ -46,3 +46,8 @@ input_units:  # data units in radiosonde files (mwx)
     "wind_speed" : "m/s"
     "v" : "m/s"
     "u" : "m/s"
+
+platform: BCO
+instrument: Radiosonde RS41-SGP by Vaisala
+instrument_id: Vaisala-RS
+
