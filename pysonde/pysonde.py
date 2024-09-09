@@ -158,7 +158,7 @@ def main(args=None):
                     continue
                 snd.calculate_additional_variables(cfg)
                 snd.convert_sounding_df2ds()
-                snd.create_dataset(cfg, RS_type = 'mwx')
+                snd.create_dataset(cfg)
                 snd.export(args["output"], cfg, RS_type = 'mwx')
 
         elif isinstance(reader, readers.readers.METEOMODEM):
@@ -174,7 +174,7 @@ def main(args=None):
                     continue
                 snd.calculate_additional_variables(cfg)
                 snd.convert_sounding_df2ds()
-                snd.create_dataset(cfg, RS_type = 'cor')
+                snd.create_dataset(cfg)
                 snd.export(args["output"], cfg, RS_type = 'cor')
 
         elif isinstance(reader, readers.readers.pysondeL1):

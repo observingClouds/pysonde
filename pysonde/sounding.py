@@ -279,7 +279,7 @@ class Sounding:
                 ds[k].encoding["dtype"] = coord_dtype
         return ds, unset_coords
 
-    def create_dataset(self, config, level=1, RS_type = 'mwx'):
+    def create_dataset(self, config, level=1):
         merged_conf = self.collect_config(config, level)
         ds = dc.create_dataset(merged_conf)
 
@@ -338,11 +338,7 @@ class Sounding:
 
         #here the attributes change depending wether it is a cor or a mwx file
         if "global_attrs" in merged_conf.keys():
-            if RS_type =='cor':
-                _cfg = h.remove_missing_cfg(merged_conf["global_attrs"], 'cor')
-            else:
-                _cfg = h.remove_missing_cfg(merged_conf["global_attrs"])
-
+            _cfg = h.remove_missing_cfg(merged_conf["global_attrs"])
             ds.attrs = _cfg
 
 

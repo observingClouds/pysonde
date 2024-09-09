@@ -237,7 +237,7 @@ def remove_nontype_keys(dict, allowed_type=type("str")):
 
 
 
-def remove_missing_cfg(cfg, RS_type = 'mwx'):
+def remove_missing_cfg(cfg):
 
     """
     Remove config keys that are missing

@@ -10,9 +10,7 @@ sync_sounding_items:
     - Altitude
     - Latitude
     - Longitude
-    #- DP
     - Ascent
-    #- Flag
 
 dictionary_input: # variable_name_in_file: variable_name_in_software
     "Press" : "pressure"
@@ -25,9 +23,7 @@ dictionary_input: # variable_name_in_file: variable_name_in_software
     "Altitude" : "height"
     "Latitude" : "latitude"
     "Longitude" : "longitude"
-    "DP" : "dew_point"
     "Ascent": "ascent_rate"
-    "Flag": "flag"
 input_units:  # data units in radiosonde files (cor)
     "pressure" : "hPa"
     "temperature" : "degree_Celsius"
