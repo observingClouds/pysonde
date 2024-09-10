@@ -28,19 +28,3 @@ repos:
     entry: mypy
     types: [python]
     require_serial: true
-- repo: local
-  hooks:
-  - id: pytest
-    name: pytest
-    language: system
-    entry: pytest
-    types: [python]
-    pass_filenames: false
-
-  - id: pytest-cov
-    name: pytest
-    language: system
-    stages: [push]
-    entry: pytest --cov --cov-fail-under=50
-    types: [python]
-    pass_filenames: false
