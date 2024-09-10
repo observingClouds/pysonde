@@ -14,14 +14,12 @@ repos:
     name: black
     entry: black
     types: [python]
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.1.1
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.6.4
   hooks:
-  - id: flake8
-    name: flake8
-    entry: flake8
-    types: [python]
-    exclude: setup.py
+  - id: ruff
+    args: [ --fix ]
+  - id: ruff-format
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.11.2
   hooks:
