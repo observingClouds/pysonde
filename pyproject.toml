@@ -8,6 +8,7 @@ authors = [
 dependencies = [
     "cartopy",
     "coverage",
+    "bottleneck",
     "dask",
     "metpy",
     "netCDF4",
