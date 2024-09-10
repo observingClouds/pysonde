@@ -1,48 +1,23 @@
 # See https://pre-commit.com/ for usage and config
 repos:
 - repo: https://github.com/PyCQA/isort
-  rev: 5.12.0
+  rev: 5.13.2
   hooks:
   - id: isort
     name: isort
     entry: isort
     types: [python]
-- repo: https://github.com/psf/black
-  rev: 23.3.0
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.6.4
   hooks:
-  - id: black
-    name: black
-    entry: black
-    types: [python]
-- repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
-  hooks:
-  - id: flake8
-    name: flake8
-    entry: flake8
-    types: [python]
-    exclude: setup.py
+  - id: ruff
+    args: [ --fix ]
+  - id: ruff-format
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.1.1
+  rev: v1.11.2
   hooks:
   - id: mypy
     name: mypy
     entry: mypy
     types: [python]
     require_serial: true
-- repo: local
-  hooks:
-  - id: pytest
-    name: pytest
-    language: system
-    entry: pytest
-    types: [python]
-    pass_filenames: false
-
-  - id: pytest-cov
-    name: pytest
-    language: system
-    stages: [push]
-    entry: pytest --cov --cov-fail-under=50
-    types: [python]
-    pass_filenames: false

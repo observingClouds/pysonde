@@ -1,5 +1,5 @@
-"""Readers for different sounding formats
-"""
+"""Readers for different sounding formats"""
+
 import datetime as dt
 import logging
 import os
@@ -150,8 +150,8 @@ class METEOMODEM(Level0):
             if (first_time_hour > 12) and (
                 dt.datetime.strptime(date_str, "%Y%m%d%H").hour == 0
             ):
-                date_dt = date_dt - dt.timedelta(
-                    days=1
+                date_dt = (
+                    date_dt - dt.timedelta(days=1)
                 )  # hour is the forecast hour and therefor at midnight -1 need to be subtracted
             elif (first_time_hour < 12) and (
                 dt.datetime.strptime(date_str, "%Y%m%d%H").hour == 0
