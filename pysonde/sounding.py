@@ -1,5 +1,4 @@
-"""Sounding class
-"""
+"""Sounding class"""
 
 import copy
 import logging

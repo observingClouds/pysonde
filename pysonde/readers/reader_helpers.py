@@ -1,5 +1,4 @@
-"""Helper functions for the different readers
-"""
+"""Helper functions for the different readers"""
 
 import glob
 import os

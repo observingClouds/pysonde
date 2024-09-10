@@ -280,7 +280,7 @@ def set_additional_var_attributes(ds, meta_data_dict, variables):
         try:
             meta_data_var = meta_data_dict[var_in]["attrs"]
             for key, value in meta_data_var.items():
-                if key not in ["_FillValue", "dtype"] and not ("time" in var_out):
+                if key not in ["_FillValue", "dtype"] and "time" not in var_out:
                     ds[var_out].attrs[key] = value
                 elif (key not in ["_FillValue", "dtype", "units"]) and (
                     "time" in var_out
