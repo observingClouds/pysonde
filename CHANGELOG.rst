@@ -7,6 +7,7 @@ unreleased
 
 * Add zenodo release information (:pr:`24`) `Hauke Schulz`_.
 * Fix warning about seeting copy of a slice of a DataFrame (:pr:`28`) `Marius Rixen`_.
+* Update infrastructure to use pyproject.toml with pdm and ruff (:pr:`29`) `Hauke Schulz`_.
 
 
 0.0.5 (2023-10-19)

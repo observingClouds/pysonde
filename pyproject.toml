@@ -1,0 +1,90 @@
+[project]
+name = "pysonde"
+dynamic = ["version"]
+description = "Post-processing tool for atmospheric sounding data"
+authors = [
+    {name = "Hauke Schulz", email = "43613877+observingClouds@users.noreply.github.com"},
+]
+dependencies = [
+    "cartopy",
+    "coverage",
+    "bottleneck",
+    "dask",
+    "metpy",
+    "netCDF4",
+    "numpy",
+    "omegaconf",
+    "pandas",
+    "Pint",
+    "Pint-Pandas",
+    "pint-xarray",
+    "PyYAML",
+    "regex",
+    "tqdm",
+    "xarray",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/observingClouds/pysonde"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8",
+    "isort",
+    "mock",
+    "mypy",
+    "pre-commit",
+    "pylint",
+    "pytest",
+    "pytest-cov",
+    "pytest-lazy-fixture",
+    "yapf",
+]
+
+[project.scripts]
+sounding_converter = "pysonde.pysonde:main"
+sounding_visualize = "pysonde.make_quicklooks_rs41:main"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.version]
+source = "scm"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts]
+post_install = "pre-commit install"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88

@@ -239,7 +239,7 @@ def set_additional_var_attributes(ds, meta_data_dict):
         except KeyError:
             continue
         for key, value in meta_data_var.items():
-            if key not in ["_FillValue", "dtype"] and not ("time" in var):
+            if key not in ["_FillValue", "dtype"] and "time" not in var:
                 ds[var].attrs[key] = value
             elif (key not in ["_FillValue", "dtype", "units"]) and ("time" in var):
                 ds[var].attrs[key] = value
