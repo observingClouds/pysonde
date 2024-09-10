@@ -1,5 +1,6 @@
 """Helper functions for the different readers
 """
+
 import glob
 import os
 import shutil
