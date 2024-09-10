@@ -80,12 +80,15 @@ class Sounding:
 
     def convert_sounding_df2ds(self):
         unit_dict = {}
-        for var in self.profile.columns:
-            if type(self.profile[var].dtype) is pint_pandas.pint_array.PintType:
-                unit_dict[var] = self.profile[var].pint.units
-                self.profile[var] = self.profile[var].pint.magnitude
+        profile_copy = self.profile.copy()
 
-        self.profile = xr.Dataset.from_dataframe(self.profile)
+        for var in profile_copy.columns:
+            if isinstance(profile_copy[var].dtype, pint_pandas.pint_array.PintType):
+                unit_dict[var] = profile_copy[var].pint.units
+                profile_copy[var] = profile_copy[var].pint.magnitude
+
+        # Convert to xarray Dataset
+        self.profile = xr.Dataset.from_dataframe(profile_copy)
 
         if self.unitregistry is not None:
             self.unitregistry.force_ndarray_like = True
