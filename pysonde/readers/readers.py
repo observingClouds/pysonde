@@ -137,15 +137,15 @@ class METEOMODEM(Level0):
         a mismatch between T, Td and RH
         """
         idx = np.where(
-            snd.Temperature == snd.Dewpoint
+            snd.temperature == snd.dew_point
         )  # might need conversion to kelvin
         _snd = snd.iloc[idx]
         idx_pd = _snd.index
         if np.any(
-            snd.loc[idx_pd, "Humidity"] != 100
+            snd.loc[idx_pd, "humidity"] != 100
         ):  # might need conversion to percent
             logging.warning("Humidity mismatch, setting Td to nan")
-            snd.loc[idx_pd, "Dewpoint"] = np.nan
+            snd.loc[idx_pd, "dew_point"] = np.nan
         return snd
 
     def read(self, cor_file, bufr_file=None, round_like_bufr=False):
