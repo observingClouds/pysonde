@@ -364,7 +364,7 @@ class Sounding:
         Saves sounding to disk
         """
         output = output_fmt.format(
-            platform=cfg.level0_mwx.get("platform"),
+            platform=cfg.level0.get("platform"),
             campaign=cfg.main.get("campaign"),
             campaign_id=cfg.main.get("campaign_id"),
             direction=self.meta_data["sounding_direction"],
