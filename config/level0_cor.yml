@@ -14,7 +14,7 @@ dictionary_input: # variable_name_in_file: variable_name_in_software
     "Flag": "flag"
 input_units:  # data units in radiosonde files (cor)
     "pressure" : "hPa"
-    "temperature" : "degree Celcius"
+    "temperature" : "degree_Celsius"
     "humidity" : "percent"
     "wind_direction" : "degree"
     "wind_speed" : "m/s"
