@@ -195,8 +195,8 @@ class METEOMODEM(Level0):
         pd_snd = rh.rename_variables(pd_snd, self.variable_name_mapping)
 
         # Convert radians to degree
-        pd_snd["Latitude"] = np.rad2deg(pd_snd["Latitude"])
-        pd_snd["Longitude"] = np.rad2deg(pd_snd["Longitude"])
+        pd_snd["latitude"] = np.rad2deg(pd_snd["latitude"])
+        pd_snd["longitude"] = np.rad2deg(pd_snd["longitude"])
 
         # Attach units where provided
         pd_snd = rh.attach_units(pd_snd, self.units, self.unitregistry)
