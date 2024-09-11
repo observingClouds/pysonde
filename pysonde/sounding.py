@@ -165,15 +165,21 @@ class Sounding:
         self.meta_data["sounding"] = id
 
     def get_sonde_type(self):
-        """Get WMO sonde type"""
-        if self.meta_data["SondeTypeName"] == "RS41-SGP":
-            self.meta_data["sonde_type"] = "123"
-        else:
-            raise SondeTypeNotImplemented(
-                "SondeTypeName {} is not implemented".format(
-                    self.meta_data["SondeTypeName"]
-                )
-            )
+        """Get sonde type"""
+        if self.level0_reader == "MWX":
+            # Check if "SondeTypeName" exists in meta_data
+            if "SondeTypeName" in self.meta_data:
+                if self.meta_data["SondeTypeName"] == "RS41-SGP":
+                    self.meta_data["sonde_type"] = "123"
+                else:
+                    raise SondeTypeNotImplemented(
+                        "SondeTypeName {} is not implemented".format(
+                            self.meta_data["SondeTypeName"]
+                        )
+                    )
+        elif self.level0_reader == "METEOMODEM":
+            logging.warning("Sonde type for METEOMODEM is assumed to be 163")
+            self.meta_data["sonde_type"] = "163"
 
     def calculate_additional_variables(self, config):
         """Calculation of additional variables"""
