@@ -107,6 +107,7 @@ class MW41(Level0):
 
         # Write to class
         sounding = snd.Sounding()
+        sounding.level0_reader = "MW41"
         sounding.profile = pd_snd
         sounding.meta_data = sounding_meta_dict
         sounding.meta_data["launch_time"] = launch_time
@@ -225,6 +226,7 @@ class METEOMODEM(Level0):
 
         # Write to class
         sounding = snd.Sounding()
+        sounding.level0_reader = "METEOMODEM"
         sounding.profile = pd_snd
         # sounding.meta_data = sounding_meta_dict
         sounding.meta_data["launch_time"] = launch_time

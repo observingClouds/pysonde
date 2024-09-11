@@ -31,6 +31,7 @@ class Sounding:
             self.profile = None
         else:
             self.profile = profile.copy(deep=True)
+        self.level0_reader = None
         self.meta_data = meta_data
         self.config = config
         self.unitregistry = ureg
