@@ -20,3 +20,6 @@ input_units:  # data units in radiosonde files (cor)
     "wind_speed" : "m/s"
     "v" : "m/s"
     "u" : "m/s"
+filename_fmt:
+    file: "??%Y%m%d%H_?"
+    datetime_fmt: "%Y%m%d%H"

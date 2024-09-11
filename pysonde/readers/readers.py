@@ -122,6 +122,15 @@ class METEOMODEM(Level0):
     Reader for level 0 data from Meteomodem sondes
     """
 
+    def __init__(self, cfg):
+        super().__init__(cfg)
+        try:
+            self.filename_fmt = cfg.level0.filename_fmt
+        except AttributeError:
+            raise AttributeError(
+                "Filename format not defined in config file; Make sure this a Level0 Meteomodem config file."
+            )
+
     def check_TU_sensor(self, snd):
         """
         Meteomodem soundings have occasionally
@@ -144,17 +153,30 @@ class METEOMODEM(Level0):
 
         def _get_date_information_from_filename(cor_file):
             basename = os.path.basename(cor_file)
-            date_str = basename.split("_")[1]
-            date_dt = dt.datetime.strptime(date_str, "%Y%m%d%H").date()
+            helper_date1 = dt.datetime(1990, 1, 1, 0, 0, 0).strftime(
+                self.filename_fmt["file"]
+            )
+            helper_date2 = dt.datetime(2024, 2, 2, 12, 30, 30).strftime(
+                self.filename_fmt["file"]
+            )
+            date_ind = [
+                i
+                for i in range(len(helper_date2))
+                if helper_date2[i] != helper_date1[i]
+            ]
+            date_str = "".join([basename[i] for i in date_ind])
+            date_fmt = self.filename_fmt["datetime_fmt"]
+
+            date_dt = dt.datetime.strptime(date_str, date_fmt).date()
             first_time_hour = np.round(pd_snd.Time[0] / (60 * 60))
             if (first_time_hour > 12) and (
-                dt.datetime.strptime(date_str, "%Y%m%d%H").hour == 0
+                dt.datetime.strptime(date_str, date_fmt).hour == 0
             ):
                 date_dt = (
                     date_dt - dt.timedelta(days=1)
                 )  # hour is the forecast hour and therefor at midnight -1 need to be subtracted
             elif (first_time_hour < 12) and (
-                dt.datetime.strptime(date_str, "%Y%m%d%H").hour == 0
+                dt.datetime.strptime(date_str, date_fmt).hour == 0
             ):
                 date_dt = date_dt
             else:
