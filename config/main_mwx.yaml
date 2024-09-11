@@ -1,0 +1,10 @@
+campaign: ORCESTRA
+campaign_id: ORCESTRA
+platform: BCO
+platform_number: 1
+location: Deebles Point
+configs:
+    main: config/main_mwx.yaml  # name of this file
+    level0: config/level0_mwx.yml
+    level1: config/level1_mwx.yaml
+    level2: config/level2.yaml
