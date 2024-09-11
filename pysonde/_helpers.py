@@ -277,7 +277,7 @@ def replace_global_attributes(ds, cfg, subset="level2"):
 def set_global_attributes(ds, cfg):
     logging.debug("Add global attributes")
 
-    _cfg = remove_missing_cfg(cfg)
+    _cfg = remove__cfg(cfg)
     ds.attrs = _cfg
 
     return ds

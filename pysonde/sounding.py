@@ -359,26 +359,17 @@ class Sounding:
             self.profile.squeeze().flight_time.values[first_idx_w_time]
         )
 
-    def export(self, output_fmt, cfg, RS_type = 'mwx'):
+    def export(self, output_fmt, cfg):
         """
         Saves sounding to disk
         """
-        if RS_type == 'cor':
-            output = output_fmt.format(
-                platform=cfg.level0_cor.get("platform"),
-                campaign=cfg.main.get("campaign"),
-                campaign_id=cfg.main.get("campaign_id"),
-                direction=self.meta_data["sounding_direction"],
-                version=cfg.main.get("data_version"),
-            )
-        else:
-            output = output_fmt.format(
-                platform=cfg.level0_mwx.get("platform"),
-                campaign=cfg.main.get("campaign"),
-                campaign_id=cfg.main.get("campaign_id"),
-                direction=self.meta_data["sounding_direction"],
-                version=cfg.main.get("data_version"),
-            )
+        output = output_fmt.format(
+            platform=cfg.level0_mwx.get("platform"),
+            campaign=cfg.main.get("campaign"),
+            campaign_id=cfg.main.get("campaign_id"),
+            direction=self.meta_data["sounding_direction"],
+            version=cfg.main.get("data_version"),
+        )
         output = self.meta_data["launch_time_dt"].strftime(output)
         directory = os.path.dirname(output)
         Path(directory).mkdir(parents=True, exist_ok=True)

@@ -159,7 +159,7 @@ def main(args=None):
                 snd.calculate_additional_variables(cfg)
                 snd.convert_sounding_df2ds()
                 snd.create_dataset(cfg)
-                snd.export(args["output"], cfg, RS_type = 'mwx')
+                snd.export(args["output"], cfg)
 
         elif isinstance(reader, readers.readers.METEOMODEM):
             sounding_asc, sounding_dsc = sounding.split_by_direction()
@@ -175,7 +175,7 @@ def main(args=None):
                 snd.calculate_additional_variables(cfg)
                 snd.convert_sounding_df2ds()
                 snd.create_dataset(cfg)
-                snd.export(args["output"], cfg, RS_type = 'cor')
+                snd.export(args["output"], cfg)
 
         elif isinstance(reader, readers.readers.pysondeL1):
             cfg = h.replace_placeholders_cfg_level2(cfg)
@@ -261,7 +261,7 @@ def main(args=None):
             sounding.create_dataset(cfg, level=2)
             sounding.get_direction()
             sounding.set_launchtime()
-            sounding.export(args["output"], cfg,)
+            sounding.export(args["output"], cfg)
 
 
 if __name__ == "__main__":
