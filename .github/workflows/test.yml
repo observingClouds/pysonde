@@ -7,13 +7,13 @@ on:
     tags: "*"
 
 jobs:
-  test:
+  linting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
@@ -21,17 +21,31 @@ jobs:
         run: |
           python -m pip install -e .[dev]
 
-      - run: isort --recursive --diff .
-      - run: black --check --diff .
-      - run: flake8
-      - run: mypy
-      - run: pytest --cov --cov-fail-under=50
+      - uses: pre-commit/action@v3.0.1
+  test_converter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies with pip
+        run: |
+          python -m pip install -e .[dev]
+
+      - name: Run conversion tests
+        run: pytest
+      - name: Run coverage tests
+        run: pytest --cov --cov-fail-under=50
   test_plotting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
       - name: Install dependencies with pip

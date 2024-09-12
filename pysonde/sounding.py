@@ -1,5 +1,5 @@
-"""Sounding class
-"""
+"""Sounding class"""
+
 import copy
 import logging
 import os
@@ -81,7 +81,7 @@ class Sounding:
     def convert_sounding_df2ds(self):
         unit_dict = {}
         profile_copy = self.profile.copy()
-    
+
         for var in profile_copy.columns:
             if isinstance(profile_copy[var].dtype, pint_pandas.pint_array.PintType):
                 unit_dict[var] = profile_copy[var].pint.units

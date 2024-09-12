@@ -1,5 +1,5 @@
-"""Readers for different sounding formats
-"""
+"""Readers for different sounding formats"""
+
 import datetime as dt
 import logging
 import os
