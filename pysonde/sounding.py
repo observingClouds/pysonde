@@ -201,7 +201,21 @@ class Sounding:
         dewpoint = td.convert_rh_to_dewpoint(
             self.profile.temperature.values, self.profile.humidity.values
         )
-        self.profile.insert(10, "dew_point", dewpoint)
+        if "dew_point" in self.profile:
+            logging.warning(
+                "Values for dew point already exist in input file. To ensure consistency, they will be recalculated."
+            )
+            diff = np.mean(self.profile.dew_point - dewpoint)
+            assert (
+                np.abs(diff).magnitude < 50
+            ), "The difference seems to be large. Are the input units in the config correct?"
+            logging.info(
+                f"Mean difference between calculated and existing dew point: {diff:.2f}"
+            )
+            self.profile.dew_point = dewpoint
+        else:
+            self.profile.insert(10, "dew_point", dewpoint)
+
         # Mixing ratio
         e_s = td.calc_saturation_pressure(self.profile.temperature.values)
         if "pint" in e_s.dtype.__str__():
