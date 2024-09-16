@@ -137,14 +137,11 @@ class METEOMODEM(Level0):
         Meteomodem soundings have occasionally
         a mismatch between T, Td and RH
         """
-        idx = np.where(
-            snd.temperature == snd.dew_point
-        )  # might need conversion to kelvin
+        idx = np.where(snd.temperature == snd.dew_point.pint.quantity.to("K").magnitude)
         _snd = snd.iloc[idx]
         idx_pd = _snd.index
-        if np.any(
-            snd.loc[idx_pd, "humidity"] != 100
-        ):  # might need conversion to percent
+        rh = snd.loc[idx_pd, "humidity"].pint.quantity.to("percent").magnitude
+        if np.any(rh != 100):
             logging.warning("Humidity mismatch, setting Td to nan")
             snd.loc[idx_pd, "dew_point"] = np.nan
         return snd
