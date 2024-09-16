@@ -183,7 +183,7 @@ def expand_pathglobs(pathparts, basepaths=None):
        --> /tmp/a2/b2
     """
     if isinstance(pathparts, str) or isinstance(pathparts, Path):
-        pathparts = Path(pathparts).parts
+        pathparts = Path(pathparts).absolute().parts
 
     if basepaths is None:
         return expand_pathglobs(pathparts[1:], [Path(pathparts[0])])
