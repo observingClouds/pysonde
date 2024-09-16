@@ -39,7 +39,10 @@ jobs:
       - name: Run conversion tests
         run: pytest
       - name: Run coverage tests
-        run: pytest --cov --cov-fail-under=50
+        run: |
+          pytest test/test_pysonde.py --cov --cov-fail-under=50
+          pytest test/test_mwx_output.py --cov --cov-fail-under=50
+          pytest test/test_cor_output.py --cov --cov-fail-under=50
   test_plotting:
     runs-on: ubuntu-latest
     steps:
