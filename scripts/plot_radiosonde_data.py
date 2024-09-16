@@ -8,7 +8,7 @@ Created on Sun Jan 29, 2023
 @author: laura
 
 run the script:
-    python make_plots_radiosonde.py -i inputfilename -o outputdirectory
+    python plot_radiosonde_data.py -i inputfilename -o outputdirectory
 for level 1 radiosonde files. The inputfilename should include the direction (ascent or descent). If not, no SkewT diagram is made.
 
 This script produces 3 plots:
