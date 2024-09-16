@@ -236,7 +236,7 @@ class METEOMODEM(Level0):
         sounding.source = cor_file
         if bufr_file is not None:
             sounding.source += ", " + bufr_file
-        sounding.meta_data["source"] = sounding.source
+        sounding.meta_data["source"] = str(sounding.source)
         return sounding
 
 
