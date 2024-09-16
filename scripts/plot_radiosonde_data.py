@@ -27,6 +27,7 @@ import metpy.calc as mpcalc
 import numpy as np
 import pint_xarray  # noqa: F401
 import xarray as xr
+from geopy.distance import geodesic
 from metpy.plots import Hodograph, SkewT
 from metpy.units import units
 
@@ -112,6 +113,30 @@ def data4skewt(direction, data):
         u, v = mpcalc.wind_components(wind_speed, wind_dir)
     return p, T, Td, wind_speed, wind_dir, u, v
 
+def calculate_max_distance(ds):
+    latitudes = ds['lat'].values
+    longitudes = ds['lon'].values
+    
+    # Ensure there are no NaN values by filtering them out
+    valid_indices = ~np.isnan(latitudes) & ~np.isnan(longitudes)
+    latitudes = latitudes[valid_indices]
+    longitudes = longitudes[valid_indices]
+    
+    # Skip soundings with insufficient valid data
+    if len(latitudes) < 2 or len(longitudes) < 2:
+        print(f"Not enough valid data for sounding {sounding}. Skipping.")
+        return None
+    
+    # Get the surface (initial) latitude and longitude
+    surface_lat = latitudes[0]
+    surface_lon = longitudes[0]
+    
+    # Calculate the distance from the surface point to each other point
+    distances = np.array([geodesic((surface_lat, surface_lon), (lat, lon)).kilometers 
+                          for lat, lon in zip(latitudes, longitudes)])
+    
+    # Return the maximum distance traveled
+    return distances.max()
 
 def main():
     args = get_args()
@@ -194,8 +219,18 @@ def main():
     alt_max = Decimal(str(alt_max)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
     ax.text(
         0.02,
-        0.07,
+        0.14,
         f"max. height: {alt_max} km",
+        transform=ax.transAxes,
+        fontsize=11,
+        verticalalignment="top",
+        bbox=props,
+    )
+    max_distance = calculate_max_distance(data).round(1)
+    ax.text(
+        0.02,
+        0.07,
+        f"max. distance: {max_distance} km",
         transform=ax.transAxes,
         fontsize=11,
         verticalalignment="top",
