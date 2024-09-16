@@ -142,7 +142,9 @@ def main(args=None):
 
         sounding = reader.read(file)
 
-        if isinstance(reader, readers.readers.MW41):
+        if isinstance(reader, readers.readers.MW41) or isinstance(
+            reader, readers.readers.METEOMODEM
+        ):
             # Split sounding into ascending and descending branch
             sounding_asc, sounding_dsc = sounding.split_by_direction()
             for snd in [sounding_asc, sounding_dsc]:
