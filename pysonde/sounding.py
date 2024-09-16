@@ -108,7 +108,7 @@ class Sounding:
         height_delta = np.diff(self.profile.height)
         ascent_rate = height_delta / time_delta
         ascent_rate_ = np.concatenate(([0], ascent_rate))  # 0 at first measurement
-        self.profile.insert(10, "ascent_rate", ascent_rate_)
+        return ascent_rate_
 
     def calc_temporal_resolution(self):
         """
@@ -184,7 +184,19 @@ class Sounding:
     def calculate_additional_variables(self, config):
         """Calculation of additional variables"""
         # Ascent rate
-        self.calc_ascent_rate()
+        ascent_rate = self.calc_ascent_rate()
+        if "ascent_rate" in self.profile:
+            logging.warning(
+                "Values for ascent rate already exist in input file. To ensure consistency, they will be recalculated."
+            )
+            diff = np.mean(self.profile.ascent_rate - ascent_rate)
+            logging.info(
+                f"Mean difference between calculated and existing ascent rate: {diff:.2f}"
+            )
+            self.profile.ascent_rate = ascent_rate
+        else:
+            self.profile.insert(10, "ascent_rate", ascent_rate)
+
         # Dew point temperature
         dewpoint = td.convert_rh_to_dewpoint(
             self.profile.temperature.values, self.profile.humidity.values
