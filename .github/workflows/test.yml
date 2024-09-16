@@ -38,9 +38,9 @@ jobs:
 
       - name: Run conversion tests
         run: |
-          pytest test/test_pysonde.py --cov --cov-fail-under=50
-          pytest test/test_mwx_output.py --cov --cov-fail-under=50
-          pytest test/test_cor_output.py --cov --cov-fail-under=50
+          pytest test/test_pysonde.py
+          pytest test/test_mwx_output.py
+          pytest test/test_cor_output.py
       - name: Run coverage tests
         run: |
           pytest --cov --cov-fail-under=50
