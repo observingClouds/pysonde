@@ -139,7 +139,7 @@ def check_availability(decomp_files, file, return_name=False):
     basenames = [os.path.basename(decomp_file) for decomp_file in decomp_files]
 
     # Availability
-    availability_mask = np.in1d(basenames, file)
+    availability_mask = np.isin(basenames, file)
 
     if np.sum(availability_mask) > 0:
         avail = True
