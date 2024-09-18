@@ -31,6 +31,7 @@ class Sounding:
             self.profile = None
         else:
             self.profile = profile.copy(deep=True)
+        self.level0_reader = None
         self.meta_data = meta_data
         self.config = config
         self.unitregistry = ureg
@@ -107,7 +108,7 @@ class Sounding:
         height_delta = np.diff(self.profile.height)
         ascent_rate = height_delta / time_delta
         ascent_rate_ = np.concatenate(([0], ascent_rate))  # 0 at first measurement
-        self.profile.insert(10, "ascent_rate", ascent_rate_)
+        return ascent_rate_
 
     def calc_temporal_resolution(self):
         """
@@ -164,25 +165,57 @@ class Sounding:
         self.meta_data["sounding"] = id
 
     def get_sonde_type(self):
-        """Get WMO sonde type"""
-        if self.meta_data["SondeTypeName"] == "RS41-SGP":
-            self.meta_data["sonde_type"] = "123"
-        else:
-            raise SondeTypeNotImplemented(
-                "SondeTypeName {} is not implemented".format(
-                    self.meta_data["SondeTypeName"]
-                )
-            )
+        """Get sonde type"""
+        if self.level0_reader == "MWX":
+            # Check if "SondeTypeName" exists in meta_data
+            if "SondeTypeName" in self.meta_data:
+                if self.meta_data["SondeTypeName"] == "RS41-SGP":
+                    self.meta_data["sonde_type"] = "123"
+                else:
+                    raise SondeTypeNotImplemented(
+                        "SondeTypeName {} is not implemented".format(
+                            self.meta_data["SondeTypeName"]
+                        )
+                    )
+        elif self.level0_reader == "METEOMODEM":
+            logging.warning("Sonde type for METEOMODEM is assumed to be 163")
+            self.meta_data["sonde_type"] = "163"
 
     def calculate_additional_variables(self, config):
         """Calculation of additional variables"""
         # Ascent rate
-        self.calc_ascent_rate()
+        ascent_rate = self.calc_ascent_rate()
+        if "ascent_rate" in self.profile:
+            logging.warning(
+                "Values for ascent rate already exist in input file. To ensure consistency, they will be recalculated."
+            )
+            diff = np.mean(self.profile.ascent_rate - ascent_rate)
+            logging.info(
+                f"Mean difference between calculated and existing ascent rate: {diff:.2f}"
+            )
+            self.profile.ascent_rate = ascent_rate
+        else:
+            self.profile.insert(10, "ascent_rate", ascent_rate)
+
         # Dew point temperature
         dewpoint = td.convert_rh_to_dewpoint(
             self.profile.temperature.values, self.profile.humidity.values
         )
-        self.profile.insert(10, "dew_point", dewpoint)
+        if "dew_point" in self.profile:
+            logging.warning(
+                "Values for dew point already exist in input file. To ensure consistency, they will be recalculated."
+            )
+            diff = np.mean(self.profile.dew_point - dewpoint)
+            assert (
+                np.abs(diff).magnitude < 50
+            ), "The difference seems to be large. Are the input units in the config correct?"
+            logging.info(
+                f"Mean difference between calculated and existing dew point: {diff:.2f}"
+            )
+            self.profile.dew_point = dewpoint
+        else:
+            self.profile.insert(10, "dew_point", dewpoint)
+
         # Mixing ratio
         e_s = td.calc_saturation_pressure(self.profile.temperature.values)
         if "pint" in e_s.dtype.__str__():

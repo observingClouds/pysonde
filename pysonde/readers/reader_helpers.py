@@ -11,6 +11,7 @@ from xml.dom import minidom
 
 import numpy as np
 import pandas as pd
+import pint_pandas as pp
 import xarray as xr
 
 
@@ -263,3 +264,18 @@ def rename_metadata(meta_dict, variable_dict):
         else:
             updated_dict[var] = meta_dict[var]
     return updated_dict
+
+
+def attach_units(pd_snd, units, unitregistry):
+    pp.PintType.ureg = unitregistry
+    PA_ = pp.PintArray
+
+    pd_snd_w_units = pd.DataFrame()
+    for var in pd_snd.columns:
+        if var in units.keys():
+            pd_snd_w_units[var] = PA_(pd_snd[var].values, dtype=units[var])
+        else:
+            # no units found
+            pd_snd_w_units[var] = pd_snd[var].values
+    pd_snd = pd_snd_w_units
+    return pd_snd

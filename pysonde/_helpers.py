@@ -6,6 +6,7 @@ import time
 from pathlib import Path, PureWindowsPath
 
 from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationKeyError
 
 
 class ReaderNotImplemented(Exception):
@@ -182,7 +183,7 @@ def expand_pathglobs(pathparts, basepaths=None):
        --> /tmp/a2/b2
     """
     if isinstance(pathparts, str) or isinstance(pathparts, Path):
-        pathparts = Path(pathparts).parts
+        pathparts = Path(pathparts).absolute().parts
 
     if basepaths is None:
         return expand_pathglobs(pathparts[1:], [Path(pathparts[0])])
@@ -242,11 +243,16 @@ def remove_missing_cfg(cfg):
     """
     return_cfg = {}
     for k in cfg.keys():
-        if OmegaConf.is_missing(cfg, k):
-            logging.warning(f"key {k} is missing and skipped")
-            pass
-        else:
-            return_cfg[k] = cfg[k]
+        try:
+            if OmegaConf.is_missing(cfg, k):
+                logging.warning(f"key {k} is missing and skipped")
+            else:
+                return_cfg[k] = cfg[k]
+        except InterpolationKeyError as e:
+            logging.warning(
+                f"Key {k} not found, setting to 'no info'. To change this behaviour, set the value explicitly in the config file mentioning {e.full_key}"
+            )
+            return_cfg[k] = "no info"
     return OmegaConf.create(return_cfg)
 
 

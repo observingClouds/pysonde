@@ -99,6 +99,10 @@ def load_reader(filename):
         from .readers.readers import MW41
 
         reader = MW41
+    elif ending == ".cor":
+        from .readers.readers import METEOMODEM
+
+        reader = METEOMODEM
     elif ending == ".nc":
         from .readers.readers import pysondeL1
 
@@ -138,7 +142,9 @@ def main(args=None):
 
         sounding = reader.read(file)
 
-        if isinstance(reader, readers.readers.MW41):
+        if isinstance(reader, readers.readers.MW41) or isinstance(
+            reader, readers.readers.METEOMODEM
+        ):
             # Split sounding into ascending and descending branch
             sounding_asc, sounding_dsc = sounding.split_by_direction()
             for snd in [sounding_asc, sounding_dsc]:

@@ -7,13 +7,6 @@ repos:
     name: isort
     entry: isort
     types: [python]
-- repo: https://github.com/psf/black
-  rev: 24.8.0
-  hooks:
-  - id: black
-    name: black
-    entry: black
-    types: [python]
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.6.4
   hooks:
