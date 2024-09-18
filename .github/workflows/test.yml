@@ -56,7 +56,7 @@ jobs:
         run: |
           python scripts/plot_radiosonde_data.py -i examples/level1/EUREC4A_BCO_Vaisala-RS_L1-ascent_20200126T2244_v3.0.0.nc -o artifacts
       - name: Upload plots
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: figures
           path: |
