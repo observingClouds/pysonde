@@ -66,6 +66,8 @@ build-backend = "pdm.backend"
 
 [tool.pdm.version]
 source = "scm"
+write_to = "pysonde/__init__.py"
+write_template = "__version__ = '{}'"
 
 [tool.pdm]
 distribution = true
