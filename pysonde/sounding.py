@@ -273,6 +273,9 @@ class Sounding:
                     ds = ds.assign_coords({var_out: [self.meta_data["sounding"]]})
             elif var_int == "platform":
                 ds[var_out].data = [config.main.platform_number]
+            ds[var_out].attrs = (
+                config[f"level{level}"].variables[var_out].get("attrs", {})
+            )
         return ds
 
     def set_coordinate_data(self, ds, coords, config):
