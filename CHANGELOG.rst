@@ -10,7 +10,7 @@ unreleased
 * Update infrastructure to use pyproject.toml with pdm and ruff (:pr:`29`, :pr:`34`) `Hauke Schulz`_.
 * Added a function computing the distance tarvelled on the ascending branch and adding it to the trajectory plot. (:pr:`33`) `Marius Winkler`_.
 * Add reader for METEOMODEM radiosonde data from `.cor` files (:pr:`26`) `Hauke Schulz` and `Marius Rixen`_.
-
+* Minor fixes of bugs introduced by aboves changes (pysonde version; sounding id; sonde type) (:pr:`38`) `Hauke Schulz`_.
 
 0.0.5 (2023-10-19)
 ------------------
