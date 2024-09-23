@@ -15,6 +15,7 @@ dependencies = [
     "numpy",
     "omegaconf",
     "pandas",
+    "pdm-backend",
     "Pint",
     "Pint-Pandas",
     "pint-xarray",
@@ -66,8 +67,6 @@ build-backend = "pdm.backend"
 
 [tool.pdm.version]
 source = "scm"
-write_to = "pysonde/__init__.py"
-write_template = "__version__ = \"{}\""
 
 [tool.pdm]
 distribution = true
@@ -80,7 +79,6 @@ ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 88
-extend-exclude = ["pysonde/__init__.py"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 18
