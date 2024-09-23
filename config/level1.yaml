@@ -22,6 +22,7 @@ global_attrs:
 coordinates:
     sounding:
         dimension: ${runtime.sounding_dim}
+        internal_varname : "sounding"
     level:
         attrs:
             long_name: "sounding height"

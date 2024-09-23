@@ -15,6 +15,7 @@ dependencies = [
     "numpy",
     "omegaconf",
     "pandas",
+    "pdm-backend",
     "Pint",
     "Pint-Pandas",
     "pint-xarray",
