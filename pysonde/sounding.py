@@ -166,7 +166,7 @@ class Sounding:
 
     def get_sonde_type(self):
         """Get sonde type"""
-        if self.level0_reader == "MWX":
+        if self.level0_reader == "MW41":
             # Check if "SondeTypeName" exists in meta_data
             if "SondeTypeName" in self.meta_data:
                 if self.meta_data["SondeTypeName"] == "RS41-SGP":
