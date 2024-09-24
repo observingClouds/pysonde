@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-unreleased
+0.0.6 (2024-09-24)
 ------------------
 
 * Add zenodo release information (:pr:`24`) `Hauke Schulz`_.
