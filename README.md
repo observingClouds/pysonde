@@ -1,6 +1,6 @@
 # pySonde: converting radiosonde files to netcdf
 
-pySonde converts Vaisala's radiosonde files (mwx) to netCDF4 and interpolates them if needed to a common height grid for easier processing.
+pySonde converts Vaisala's radiosonde files (mwx) and Meteomodem soundings (cor) to netCDF4 and interpolates them if needed to a common height grid for easier processing.
 
 ## Setup
 ```
