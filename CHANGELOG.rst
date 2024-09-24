@@ -2,6 +2,10 @@
 CHANGELOG
 =========
 
+0.0.7 (2024-09-24)
+------------------
+* Clean-release with GitHub and pypi release (:pr:`39`) `Hauke Schulz`_.
+
 0.0.6 (2024-09-24)
 ------------------
 
