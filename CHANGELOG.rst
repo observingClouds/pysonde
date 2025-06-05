@@ -2,6 +2,10 @@
 CHANGELOG
 =========
 
+0.0.8 (2025-06-05)
+------------------
+* Added Wagner&Pruss option for the calculation of the saturation vapour pressure. (:pr:`43`) `Marius Winkler`_.
+
 0.0.7 (2024-09-24)
 ------------------
 * Clean-release with GitHub and pypi release (:pr:`39`) `Hauke Schulz`_.

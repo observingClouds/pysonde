@@ -2,7 +2,6 @@ import logging
 import os
 from pathlib import Path
 
-import metpy.calc as mpcalc
 import numpy as np
 import pandas as pd
 import pyproj
@@ -250,7 +249,9 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
     w = (ds_interp.isel(sounding=0)["specific_humidity"]) / (
         1 - ds_interp.isel(sounding=0)["specific_humidity"]
     )
-    e_s = td.calc_saturation_pressure(ds_interp.isel(sounding=0)["temperature"], method="wagner_pruss")
+    e_s = td.calc_saturation_pressure(
+        ds_interp.isel(sounding=0)["temperature"], method="wagner_pruss"
+    )
     w_s = td.calc_wv_mixing_ratio(ds_interp.isel(sounding=0), e_s)
     relative_humidity = w / w_s * 100
 

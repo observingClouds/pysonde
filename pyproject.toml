@@ -24,6 +24,7 @@ dependencies = [
     "tqdm",
     "xarray",
     "geopy",
+    "moist_thermodynamics", 
 ]
 requires-python = ">=3.9"
 readme = "README.md"

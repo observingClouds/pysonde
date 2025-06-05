@@ -5,10 +5,9 @@ Thermodynamic functions
 import metpy
 import metpy.calc as mpcalc
 import numpy as np
+import pint
 import pint_pandas as pp
 import xarray as xr
-import pint
-from pint import UnitRegistry
 from moist_thermodynamics import saturation_vapor_pressures as mtsvp
 
 # ureg = pint.UnitRegistry()
@@ -69,31 +68,50 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
     if isinstance(temperature, pp.pint_array.PintArray):
         ureg = temperature.units._REGISTRY
         temperature_K = temperature.quantity.to("K").magnitude
-    elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(temperature.data, "_units"):
+    elif isinstance(temperature, xr.core.dataarray.DataArray) and hasattr(
+        temperature.data, "_units"
+    ):
         temperature_K = temperature.pint.to("K").metpy.magnitude
     else:
         temperature_K = temperature  # Assume already in Kelvin
 
     if method == "hardy1998":
-        #print("I use hardy1998 for e_s!!!")
-        g = np.array([-2.8365744e3, -6.028076559e3, 1.954263612e1, -2.737830188e-2,
-                      1.6261698e-5, 7.0229056e-10, -1.8680009e-13, 2.7150305])
-        
-        e_sw = np.exp(np.sum([g[i] * temperature_K ** (i - 2) for i in range(7)], axis=0) + g[7] * np.log(temperature_K))
+        # print("I use hardy1998 for e_s!!!")
+        g = np.array(
+            [
+                -2.8365744e3,
+                -6.028076559e3,
+                1.954263612e1,
+                -2.737830188e-2,
+                1.6261698e-5,
+                7.0229056e-10,
+                -1.8680009e-13,
+                2.7150305,
+            ]
+        )
+
+        e_sw = np.exp(
+            np.sum([g[i] * temperature_K ** (i - 2) for i in range(7)], axis=0)
+            + g[7] * np.log(temperature_K)
+        )
 
     elif method == "wagner_pruss":
-        #print("I use wagner_pruss for e_s!!!")
+        # print("I use wagner_pruss for e_s!!!")
         e_sw = mtsvp.liq_wagner_pruss(temperature_K)
 
     else:
-        raise ValueError(f"Unknown method '{method}'. Available methods: 'hardy1998', 'wagner_pruss'.")
+        raise ValueError(
+            f"Unknown method '{method}'. Available methods: 'hardy1998', 'wagner_pruss'."
+        )
 
     # Convert result back to PintArray or xarray DataArray
     if isinstance(temperature, pp.pint_array.PintArray):
         pp.PintType.ureg = ureg
         e_sw = pp.PintArray(e_sw, dtype="Pa")
     elif isinstance(temperature, xr.DataArray) and hasattr(temperature.data, "_units"):
-        e_sw = xr.DataArray(e_sw, dims=temperature.dims, coords=temperature.coords) * metpy.units.units("Pa")
+        e_sw = xr.DataArray(
+            e_sw, dims=temperature.dims, coords=temperature.coords
+        ) * metpy.units.units("Pa")
 
     return e_sw
 
@@ -101,7 +119,7 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
 def calc_wv_mixing_ratio(sounding, vapor_pressure):
     """
     Works for both LEVEL-1 and LEVEL-2.
-    
+
     Key improvements:
     - Handles both raw numeric values and Pint-quantified inputs.
     - Dynamically detects pressure variable ("p" or "pressure").
@@ -130,16 +148,22 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
         try:
             vapor_pressure = vapor_pressure.pint.to("Pa")
         except AttributeError:
-            vapor_pressure = vapor_pressure.pint.quantify({"vapor_pressure": "Pa"}).pint.to("Pa")
+            vapor_pressure = vapor_pressure.pint.quantify(
+                {"vapor_pressure": "Pa"}
+            ).pint.to("Pa")
     elif isinstance(vapor_pressure, pint.Quantity):
         vapor_pressure = vapor_pressure.to(ureg.Pa)
     else:
-        vapor_pressure = vapor_pressure * ureg.Pa  
+        vapor_pressure = vapor_pressure * ureg.Pa
 
     # Identify and convert total pressure
-    pressure_var = "p" if "p" in sounding else "pressure" if "pressure" in sounding else None
+    pressure_var = (
+        "p" if "p" in sounding else "pressure" if "pressure" in sounding else None
+    )
     if pressure_var is None:
-        raise KeyError("No valid pressure variable found in the dataset! Expected 'p' or 'pressure'.")
+        raise KeyError(
+            "No valid pressure variable found in the dataset! Expected 'p' or 'pressure'."
+        )
 
     total_pressure = sounding[pressure_var]
     if hasattr(total_pressure, "pint"):
