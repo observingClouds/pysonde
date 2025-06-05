@@ -2,6 +2,10 @@
 CHANGELOG
 =========
 
+0.0.8 (2025-06-05)
+------------------
+* Improved version of export function which sanitizes the platform name and ensures more robust output. (:pr:`44`) `Marius Winkler`_.
+
 0.0.7 (2024-09-24)
 ------------------
 * Clean-release with GitHub and pypi release (:pr:`39`) `Hauke Schulz`_.

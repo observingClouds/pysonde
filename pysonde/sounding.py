@@ -388,10 +388,16 @@ class Sounding:
 
     def export(self, output_fmt, cfg):
         """
-        Saves sounding to disk
+        Saves sounding to disk with correctly formatted filename.
+
+        - Uses platform from `cfg.main.get("platform")` instead of extracting from filename.
+        - Converts "RV Meteor" → "RV_Meteor" while keeping config unchanged.
+        - Ensures 'platform' variable is correctly set before exporting.
         """
         output = output_fmt.format(
-            platform=cfg.main.get("platform"),
+            platform=cfg.main.get("platform").replace(
+                " ", "_"
+            ),  # Replace spaces with underscores
             campaign=cfg.main.get("campaign"),
             campaign_id=cfg.main.get("campaign_id"),
             direction=self.meta_data["sounding_direction"],
@@ -400,6 +406,11 @@ class Sounding:
         output = self.meta_data["launch_time_dt"].strftime(output)
         directory = os.path.dirname(output)
         Path(directory).mkdir(parents=True, exist_ok=True)
+
+        platform_name = cfg.main.get("platform").replace(" ", "_")
+        platform_data = [platform_name] * self.dataset.dims["sounding"]
+        self.dataset["platform"] = xr.DataArray(platform_data, dims=["sounding"])
+        self.dataset["platform"].attrs["long_name"] = "Launching platform"
         self.dataset.encoding["unlimited_dims"] = ["sounding"]
         self.dataset.to_netcdf(output)
         logging.info(f"Sounding written to {output}")
