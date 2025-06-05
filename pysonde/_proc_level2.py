@@ -387,6 +387,16 @@ def finalize_attrs(ds_interp, ds, cfg, file, variables):
     # merged_conf._set_parent(OmegaConf.merge(config, meta_data_cfg))
     ds_interp.attrs = ds.attrs
 
+    # Replace placeholders in global attributes
+    for key, value in ds_interp.attrs.items():
+        if isinstance(value, str):  # Only process string attributes
+            try:
+                ds_interp.attrs[key] = value.format(**ds_interp.attrs)
+            except KeyError as e:
+                print(
+                    f"Warning: Placeholder {e} in attribute '{key}' could not be replaced."
+                )
+
     ds_interp = h.replace_global_attributes(ds_interp, cfg)
     ds_interp.attrs["source"] = str(file).split("/")[-1]
 
