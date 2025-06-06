@@ -389,11 +389,11 @@ def finalize_attrs(ds_interp, ds, cfg, file, variables):
 
     # Replace placeholders in global attributes
     for key, value in ds_interp.attrs.items():
-        if isinstance(value, str):  # Only process string attributes
+        if isinstance(value, str):
             try:
                 ds_interp.attrs[key] = value.format(**ds_interp.attrs)
             except KeyError as e:
-                print(
+                logging.warning(
                     f"Warning: Placeholder {e} in attribute '{key}' could not be replaced."
                 )
 

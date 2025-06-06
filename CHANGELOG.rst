@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-0.0.8 (2025-06-05)
+unreleased
 ------------------
 * Added dynamic placeholder replacement in global attributes. (:pr:`46`) `Marius Winkler`_.
 
