@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-0.0.8 (2025-06-05)
+unreleased
 ------------------
 * Added function to get sonde serial number (:pr:`47`) `Marius Winkler`_.
 
