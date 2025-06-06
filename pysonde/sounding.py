@@ -190,7 +190,7 @@ class Sounding:
                 self.meta_data["sonde_serial_number"] = self.meta_data["SerialNbr"]
             else:
                 logging.warning("Serial number missing in meta_data for MW41.")
-                self.meta_data["sonde_serial_number"] = np.nan  # Assign NaN if missing
+                self.meta_data["sonde_serial_number"] = np.nan
         elif self.level0_reader == "METEOMODEM":
             logging.warning("METEOMODEM does not have a serial number. Assigning NaN.")
             self.meta_data["sonde_serial_number"] = np.nan  # Assign same NaN type
