@@ -193,7 +193,7 @@ class Sounding:
                 self.meta_data["sonde_serial_number"] = np.nan
         elif self.level0_reader == "METEOMODEM":
             logging.warning("METEOMODEM does not have a serial number. Assigning NaN.")
-            self.meta_data["sonde_serial_number"] = np.nan  # Assign same NaN type
+            self.meta_data["sonde_serial_number"] = np.nan
 
     def calculate_additional_variables(self, config):
         """Calculation of additional variables"""
