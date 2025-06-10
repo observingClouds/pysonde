@@ -405,14 +405,13 @@ class Sounding:
         """
         Saves sounding to disk with correctly formatted filename.
 
-        - Uses platform from `cfg.main.get("platform")` instead of extracting from filename.
-        - Converts "RV Meteor" → "RV_Meteor" while keeping config unchanged.
-        - Ensures 'platform' variable is correctly set before exporting.
+        - Uses platform from `cfg.main.get("platform")`
+        - Changes platform name to snake_format.
         """
+        platform_name = cfg.main.get("platform").replace(" ", "_")
+
         output = output_fmt.format(
-            platform=cfg.main.get("platform").replace(
-                " ", "_"
-            ),  # Replace spaces with underscores
+            platform=platform_name,
             campaign=cfg.main.get("campaign"),
             campaign_id=cfg.main.get("campaign_id"),
             direction=self.meta_data["sounding_direction"],
@@ -422,7 +421,6 @@ class Sounding:
         directory = os.path.dirname(output)
         Path(directory).mkdir(parents=True, exist_ok=True)
 
-        platform_name = cfg.main.get("platform").replace(" ", "_")
         platform_data = [platform_name] * self.dataset.dims["sounding"]
         self.dataset["platform"] = xr.DataArray(platform_data, dims=["sounding"])
         self.dataset["platform"].attrs["long_name"] = "Launching platform"
