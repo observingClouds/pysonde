@@ -181,6 +181,20 @@ class Sounding:
             logging.warning("Sonde type for METEOMODEM is assumed to be 163")
             self.meta_data["sonde_type"] = "163"
 
+    def get_sonde_serial_number(self):
+        """Get sonde serial number"""
+
+        if self.level0_reader == "MW41":
+            # Check if "SerialNbr" exists in meta_data
+            if "SerialNbr" in self.meta_data:
+                self.meta_data["sonde_serial_number"] = self.meta_data["SerialNbr"]
+            else:
+                logging.warning("Serial number missing in meta_data for MW41.")
+                self.meta_data["sonde_serial_number"] = np.nan
+        elif self.level0_reader == "METEOMODEM":
+            logging.warning("METEOMODEM does not have a serial number. Assigning NaN.")
+            self.meta_data["sonde_serial_number"] = np.nan
+
     def calculate_additional_variables(self, config):
         """Calculation of additional variables"""
         # Ascent rate
@@ -240,6 +254,7 @@ class Sounding:
         # Sounding ID
         self.generate_sounding_id(config)
         self.get_sonde_type()
+        self.get_sonde_serial_number()
 
     def collect_config(self, config, level):
         level_dims = {1: "flight_time", 2: "altitude"}
