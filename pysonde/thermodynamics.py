@@ -167,9 +167,11 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
         total_pressure = pint.Quantity(total_pressure.values, ureg.Pa)
 
     # Compute mixing ratio
-    Md = metpy.constants.molecular_weight_dry_air
-    Mv = metpy.constants.molecular_weight_water_vapor
-    wv_mix_ratio = (Mv / Md) * vapor_pressure / (total_pressure - vapor_pressure)
+    wv_mix_ratio = (
+        metpy.constants.molecular_weight_ratio
+        * vapor_pressure
+        / (total_pressure - vapor_pressure)
+    )
 
     # Ensure correct output units
     try:
