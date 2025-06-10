@@ -116,13 +116,7 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
 
 def calc_wv_mixing_ratio(sounding, vapor_pressure):
     """
-    Works for both LEVEL-1 and LEVEL-2.
-
-    Key improvements:
-    - Handles both raw numeric values and Pint-quantified inputs.
-    - Dynamically detects pressure variable ("p" or "pressure").
-    - Ensures unit consistency across different dataset formats.
-    - Includes error handling for missing or incompatible units.
+    Calculate water vapor mixing ratio
 
     Parameters:
     ----------
