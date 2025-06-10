@@ -403,7 +403,7 @@ class Sounding:
 
     def export(self, output_fmt, cfg):
         """
-        Saves sounding to disk with correctly formatted filename.
+        Save sounding to disk.
 
         - Uses platform from `cfg.main.get("platform")`
         - Changes platform name to snake_format.
