@@ -123,7 +123,7 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
     sounding : xarray.Dataset
         Dataset containing pressure values.
     vapor_pressure : xarray.DataArray or pint.Quantity
-        Vapor pressure values (must have units of Pascal).
+        Vapor pressure values
 
     Returns:
     -------
