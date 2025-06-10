@@ -168,7 +168,7 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
 
     # Compute mixing ratio
     wv_mix_ratio = (
-        metpy.constants.molecular_weight_ratio
+        metpy.constants.molecular_weight_ratio.magnitude
         * vapor_pressure
         / (total_pressure - vapor_pressure)
     )
