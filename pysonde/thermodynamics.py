@@ -76,7 +76,6 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
         temperature_K = temperature  # Assume already in Kelvin
 
     if method == "hardy1998":
-        # print("I use hardy1998 for e_s!!!")
         g = np.array(
             [
                 -2.8365744e3,
