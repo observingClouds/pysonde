@@ -63,6 +63,15 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
     -------
     e_sw : array, pint.Quantity, or xarray.DataArray
         Saturation vapor pressure in Pascals.
+
+    Examples
+    --------
+    >>> calc_saturation_pressure([273.15])
+    array([ 611.2129107])
+    >>> calc_saturation_pressure([273.15, 293.15, 253.15])
+    array([  611.2129107 ,  2339.26239586,   125.58350529])
+    >>> calc_saturation_pressure([273.15, 293.15, 253.15], method='wagner_pruss')
+    array([611.2128459, 2339.1937366, 125.6039870])
     """
     # Ensure temperature is in Kelvin
     if isinstance(temperature, pp.pint_array.PintArray):
@@ -148,16 +157,8 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
     else:
         vapor_pressure = vapor_pressure * ureg.Pa
 
-    # Identify and convert total pressure
-    pressure_var = (
-        "p" if "p" in sounding else "pressure" if "pressure" in sounding else None
-    )
-    if pressure_var is None:
-        raise KeyError(
-            "No valid pressure variable found in the dataset! Expected 'p' or 'pressure'."
-        )
+    total_pressure = sounding["pressure"]
 
-    total_pressure = sounding[pressure_var]
     if hasattr(total_pressure, "pint"):
         total_pressure = total_pressure.pint.to("Pa")
     elif isinstance(total_pressure, pint.Quantity):
@@ -166,7 +167,9 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
         total_pressure = pint.Quantity(total_pressure.values, ureg.Pa)
 
     # Compute mixing ratio
-    wv_mix_ratio = (0.622 * vapor_pressure) / (total_pressure - vapor_pressure)
+    Md = metpy.constants.molecular_weight_dry_air
+    Mv = metpy.constants.molecular_weight_water_vapor
+    wv_mix_ratio = (Mv / Md) * vapor_pressure / (total_pressure - vapor_pressure)
 
     # Ensure correct output units
     try:
