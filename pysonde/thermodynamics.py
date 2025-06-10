@@ -95,7 +95,6 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
         )
 
     elif method == "wagner_pruss":
-        # print("I use wagner_pruss for e_s!!!")
         e_sw = mtsvp.liq_wagner_pruss(temperature_K)
 
     else:
