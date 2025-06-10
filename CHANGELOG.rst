@@ -2,12 +2,16 @@
 CHANGELOG
 =========
 
-0.0.8 (2025-06-05)
+unreleased
 ------------------
+
 * Improved version of export function which sanitizes the platform name and ensures more robust output. (:pr:`44`) `Marius Winkler`_.
+* Added dynamic placeholder replacement in global attributes. (:pr:`46`) `Marius Winkler`_.
+* Added function to get sonde serial number (:pr:`47`) `Marius Winkler`_.
 
 0.0.7 (2024-09-24)
 ------------------
+
 * Clean-release with GitHub and pypi release (:pr:`39`) `Hauke Schulz`_.
 
 0.0.6 (2024-09-24)
