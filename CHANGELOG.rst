@@ -6,6 +6,8 @@ CHANGELOG
 unreleased
 ------------------
 
+* Added Wagner&Pruss option for the calculation of the saturation vapour pressure. (:pr:`43`) `Marius Winkler`_.
+* Remove support of Python 3.9 (:pr:`43`) `Hauke Schulz`_.
 * Improved version of export function which sanitizes the platform name and ensures more robust output. (:pr:`44`) `Marius Winkler`_.
 * Corrected date information function which extracts info from filename for cor-files. (:pr:`45`) `Marius Winkler`_.
 * Added dynamic placeholder replacement in global attributes. (:pr:`46`) `Marius Winkler`_.

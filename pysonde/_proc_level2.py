@@ -2,7 +2,6 @@ import logging
 import os
 from pathlib import Path
 
-import metpy.calc as mpcalc
 import numpy as np
 import pandas as pd
 import pyproj
@@ -43,9 +42,10 @@ def prepare_data_for_interpolation(ds, uni, variables, reader=pysondeL1):
     # Calculate more thermodynamical variables (used for interpolation)
     td.metpy.units.units = uni
     theta = td.calc_theta_from_T(ds["ta"], ds["p"])
-    e_s = td.calc_saturation_pressure(ds["ta"])
-    w_s = mpcalc.mixing_ratio(e_s, ds["p"].metpy.quantify())
-    w = ds["rh"].data * w_s
+
+    e_s = td.calc_saturation_pressure(ds["ta"], method="wagner_pruss")
+    e = ds["rh"] * e_s
+    w = td.calc_wv_mixing_ratio(ds["p"], e)
     q = w / (1 + w)
 
     w["level"] = ds.alt.data
@@ -249,8 +249,10 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
     w = (ds_interp.isel(sounding=0)["specific_humidity"]) / (
         1 - ds_interp.isel(sounding=0)["specific_humidity"]
     )
+
     e_s = td.calc_saturation_pressure(ds_interp.isel(sounding=0)["temperature"])
-    w_s = mpcalc.mixing_ratio(e_s, ds_interp.isel(sounding=0)["pressure"].data)
+    w_s = td.calc_wv_mixing_ratio(ds_interp.isel(sounding=0), e_s)
+
     relative_humidity = w / w_s * 100
 
     ds_interp["relative_humidity"] = xr.DataArray(
