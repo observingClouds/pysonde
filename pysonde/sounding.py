@@ -181,6 +181,20 @@ class Sounding:
             logging.warning("Sonde type for METEOMODEM is assumed to be 163")
             self.meta_data["sonde_type"] = "163"
 
+    def get_sonde_serial_number(self):
+        """Get sonde serial number"""
+
+        if self.level0_reader == "MW41":
+            # Check if "SerialNbr" exists in meta_data
+            if "SerialNbr" in self.meta_data:
+                self.meta_data["sonde_serial_number"] = self.meta_data["SerialNbr"]
+            else:
+                logging.warning("Serial number missing in meta_data for MW41.")
+                self.meta_data["sonde_serial_number"] = np.nan
+        elif self.level0_reader == "METEOMODEM":
+            logging.warning("METEOMODEM does not have a serial number. Assigning NaN.")
+            self.meta_data["sonde_serial_number"] = np.nan
+
     def calculate_additional_variables(self, config):
         """Calculation of additional variables"""
         # Ascent rate
@@ -238,6 +252,7 @@ class Sounding:
         # Sounding ID
         self.generate_sounding_id(config)
         self.get_sonde_type()
+        self.get_sonde_serial_number()
 
     def collect_config(self, config, level):
         level_dims = {1: "flight_time", 2: "altitude"}
@@ -388,10 +403,15 @@ class Sounding:
 
     def export(self, output_fmt, cfg):
         """
-        Saves sounding to disk
+        Save sounding to disk.
+
+        - Uses platform from `cfg.main.get("platform")`
+        - Changes platform name to snake_format.
         """
+        platform_name = cfg.main.get("platform").replace(" ", "_")
+
         output = output_fmt.format(
-            platform=cfg.main.get("platform"),
+            platform=platform_name,
             campaign=cfg.main.get("campaign"),
             campaign_id=cfg.main.get("campaign_id"),
             direction=self.meta_data["sounding_direction"],
@@ -400,6 +420,10 @@ class Sounding:
         output = self.meta_data["launch_time_dt"].strftime(output)
         directory = os.path.dirname(output)
         Path(directory).mkdir(parents=True, exist_ok=True)
+
+        platform_data = [platform_name] * self.dataset.dims["sounding"]
+        self.dataset["platform"] = xr.DataArray(platform_data, dims=["sounding"])
+        self.dataset["platform"].attrs["long_name"] = "Launching platform"
         self.dataset.encoding["unlimited_dims"] = ["sounding"]
         self.dataset.to_netcdf(output)
         logging.info(f"Sounding written to {output}")
