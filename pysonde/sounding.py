@@ -231,16 +231,17 @@ class Sounding:
             self.profile.insert(10, "dew_point", dewpoint)
 
         # Mixing ratio
-        e_s = td.calc_saturation_pressure(
-            self.profile.temperature.values, method="wagner_pruss"
-        )
+        e_s = td.calc_saturation_pressure(self.profile.temperature.values)
         if "pint" in e_s.dtype.__str__():
-            mixing_ratio = td.calc_wv_mixing_ratio(
-                self.profile["pressure"], e_s * self.profile.humidity.values
+            mixing_ratio = (
+                td.calc_wv_mixing_ratio(self.profile["pressure"], e_s)
+                * self.profile.humidity.values
             )
         else:
-            mixing_ratio = td.calc_wv_mixing_ratio(
-                self.profile, e_s * self.profile.humidity.values / 100.0
+            mixing_ratio = (
+                td.calc_wv_mixing_ratio(self.profile, e_s)
+                * self.profile.humidity.values
+                / 100.0
             )
         self.profile.insert(10, "mixing_ratio", mixing_ratio)
         self.meta_data["launch_time_dt"] = self.profile.flight_time.iloc[0]
