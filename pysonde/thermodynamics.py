@@ -127,51 +127,36 @@ def calc_wv_mixing_ratio(total_pressure, vapor_pressure):
     """
     Calculate water vapor mixing ratio
 
-    Parameters:
+    Parameters
     ----------
-    total_pressure : xarray.Dataset or pint.Quantity
-        Dataset containing total pressure values.
-    vapor_pressure : xarray.DataArray or pint.Quantity
-        Vapor pressure values
+    total_pressure : DataArray or pint.Quantity
+        Atmospheric pressure with units.
+    vapor_pressure : DataArray or pint.Quantity
+        Vapor pressure with units.
 
-    Returns:
+    Returns
     -------
-    xarray.DataArray
-        Water vapor mixing ratio with units of kg/kg.
+    DataArray or Quantity
+        Mixing ratio in kg/kg.
     """
+    ureg = pint.get_application_registry()
+    epsilon = metpy.constants.molecular_weight_ratio
 
-    ureg = pint.get_application_registry()  # Ensure unit consistency
-
-    # Convert vapor_pressure to Pascal if necessary
-    if isinstance(vapor_pressure, pp.pint_array.PintArray):
-        vapor_pressure = vapor_pressure.quantity
-    elif isinstance(vapor_pressure, xr.DataArray):
-        try:
-            vapor_pressure = vapor_pressure.pint.to("Pa")
-        except AttributeError:
-            vapor_pressure = vapor_pressure.pint.quantify(
-                {"vapor_pressure": "Pa"}
-            ).pint.to("Pa")
-    elif isinstance(vapor_pressure, pint.Quantity):
-        vapor_pressure = vapor_pressure.to(ureg.Pa)
+    # Ensure both are pint.Quantity or pint-xarray with units of Pa
+    if hasattr(vapor_pressure, "pint"):
+        vapor_pressure = vapor_pressure.pint.to("Pa")
     else:
         vapor_pressure = vapor_pressure * ureg.Pa
 
     if hasattr(total_pressure, "pint"):
         total_pressure = total_pressure.pint.to("Pa")
-    elif isinstance(total_pressure, pint.Quantity):
-        total_pressure = total_pressure.to(ureg.Pa)
     else:
-        total_pressure = pint.Quantity(total_pressure.values, ureg.Pa)
+        total_pressure = total_pressure * ureg.Pa
 
     # Compute mixing ratio
-    wv_mix_ratio = (
-        metpy.constants.molecular_weight_ratio.magnitude
-        * vapor_pressure
-        / (total_pressure - vapor_pressure)
-    )
+    wv_mix_ratio = epsilon * vapor_pressure / (total_pressure - vapor_pressure)
 
-    # Ensure correct output units
+    # Ensure units are correct
     try:
         wv_mix_ratio = wv_mix_ratio.pint.to("kg/kg")
     except AttributeError:
