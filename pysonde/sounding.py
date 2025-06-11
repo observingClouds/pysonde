@@ -236,12 +236,12 @@ class Sounding:
         )
         if "pint" in e_s.dtype.__str__():
             mixing_ratio = (
-                td.calc_wv_mixing_ratio(self.profile, e_s)
+                td.calc_wv_mixing_ratio(self.profile["pressure"], e_s)
                 * self.profile.humidity.values
             )
         else:
             mixing_ratio = (
-                td.calc_wv_mixing_ratio(self.profile, e_s)
+                td.calc_wv_mixing_ratio(self.profile["pressure"], e_s)
                 * self.profile.humidity.values
                 / 100.0
             )

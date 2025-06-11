@@ -123,14 +123,14 @@ def calc_saturation_pressure(temperature, method="hardy1998"):
     return e_sw
 
 
-def calc_wv_mixing_ratio(sounding, vapor_pressure):
+def calc_wv_mixing_ratio(total_pressure, vapor_pressure):
     """
     Calculate water vapor mixing ratio
 
     Parameters:
     ----------
-    sounding : xarray.Dataset
-        Dataset containing pressure values.
+    total_pressure : xarray.Dataset or pint.Quantity
+        Dataset containing total pressure values.
     vapor_pressure : xarray.DataArray or pint.Quantity
         Vapor pressure values
 
@@ -156,8 +156,6 @@ def calc_wv_mixing_ratio(sounding, vapor_pressure):
         vapor_pressure = vapor_pressure.to(ureg.Pa)
     else:
         vapor_pressure = vapor_pressure * ureg.Pa
-
-    total_pressure = sounding["pressure"]
 
     if hasattr(total_pressure, "pint"):
         total_pressure = total_pressure.pint.to("Pa")

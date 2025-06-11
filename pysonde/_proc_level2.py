@@ -45,7 +45,7 @@ def prepare_data_for_interpolation(ds, uni, variables, reader=pysondeL1):
 
     e_s = td.calc_saturation_pressure(ds["ta"], method="wagner_pruss")
     e = ds["rh"] * e_s
-    w = td.calc_wv_mixing_ratio(ds, e)
+    w = td.calc_wv_mixing_ratio(ds["p"], e)
     q = w / (1 + w)
 
     w["level"] = ds.alt.data
@@ -252,7 +252,7 @@ def adjust_ds_after_interpolation(ds_interp, ds, ds_input, variables, cfg):
     e_s = td.calc_saturation_pressure(
         ds_interp.isel(sounding=0)["temperature"], method="wagner_pruss"
     )
-    w_s = td.calc_wv_mixing_ratio(ds_interp.isel(sounding=0), e_s)
+    w_s = td.calc_wv_mixing_ratio(ds_interp.isel(sounding=0)["pressure"], e_s)
     relative_humidity = w / w_s * 100
 
     ds_interp["relative_humidity"] = xr.DataArray(
