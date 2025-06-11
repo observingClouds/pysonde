@@ -405,10 +405,15 @@ class Sounding:
 
     def export(self, output_fmt, cfg):
         """
-        Saves sounding to disk
+        Save sounding to disk.
+
+        - Uses platform from `cfg.main.get("platform")`
+        - Changes platform name to snake_format.
         """
+        platform_name = cfg.main.get("platform").replace(" ", "_")
+
         output = output_fmt.format(
-            platform=cfg.main.get("platform"),
+            platform=platform_name,
             campaign=cfg.main.get("campaign"),
             campaign_id=cfg.main.get("campaign_id"),
             direction=self.meta_data["sounding_direction"],
@@ -417,6 +422,10 @@ class Sounding:
         output = self.meta_data["launch_time_dt"].strftime(output)
         directory = os.path.dirname(output)
         Path(directory).mkdir(parents=True, exist_ok=True)
+
+        platform_data = [platform_name] * self.dataset.dims["sounding"]
+        self.dataset["platform"] = xr.DataArray(platform_data, dims=["sounding"])
+        self.dataset["platform"].attrs["long_name"] = "Launching platform"
         self.dataset.encoding["unlimited_dims"] = ["sounding"]
         self.dataset.to_netcdf(output)
         logging.info(f"Sounding written to {output}")
